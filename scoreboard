@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+
+import RPi.GPIO as GPIO
+from time import sleep
+import subprocess
+from config import Config
+
+process = None
+mode = None
+
+def switch_toggled(channel):
+    global process
+
+    sleep(0.25)
+    if process and ((GPIO.input(15) == 0 and mode == 'offline') or (GPIO.input(15) == 1 and mode == 'online')):
+        print('Killing old process')
+        process.kill()
+        process = None
+
+
+# copy the config file into the root filesystem
+config = Config()
+config.load()
+
+# setup the online / offline switch
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(15, GPIO.IN, GPIO.PUD_UP)
+GPIO.add_event_detect(15, GPIO.BOTH, callback=switch_toggled, bouncetime=500)
+
+
+
+# start up the scoreboard in the correct mode
+while True:
+    try:
+
+        if GPIO.input(15) == 0:
+            print('Starting Online Mode')
+
+            # online mode
+            mode = 'online'
+            sleep(0.25)
+
+            # enable wifi
+            with open('/etc/wpa_supplicant.conf', "w") as outfile:
+                subprocess.run(["wpa_passphrase", config.wifi["ssid"], config.wifi["password"]], stdout=outfile)
+            subprocess.run(["ifup", "wlan0"])
+
+            # start the app
+            process = subprocess.Popen(["taskset","8","python3","/bin/sb_online.py"])
+            process.wait()
+            print('Online Mode Exited')
+
+        else:
+            print('Starting Offline Mode')
+
+            # offline mode
+            mode = 'offline'
+            process = subprocess.Popen(["taskset","8","python3","/bin/sb_offline.py"])
+            process.wait()
+            print('Offline Mode Exited')
+
+    except Exception as e:
+        print(e)
+

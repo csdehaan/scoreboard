@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+
+import sys
+import subprocess
+from config import Config
+
+cmd = sys.argv[1]
+
+config = Config()
+config.read()
+config.config[sys.argv[2]][sys.argv[3]] = sys.argv[4]
+
+if cmd == 'write':
+    config.write()
+if cmd == 'save':
+    config.save()
+if cmd == 'restart':
+    config.save()
+    subprocess.run(["pkill", "-f", "sb_online.py"])
+    subprocess.run(["pkill", "-f", "sb_offline.py"])
+

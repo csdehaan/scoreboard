@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import urllib.request
+import json
+from api import Api
+from config import Config
+
+
+config = Config()
+config.read()
+
+api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 10))
+
+
+SW_MAJOR = 1
+SW_MINOR = 0
+SW_DEBUG = 0
+
+sw = api.scoreboard_software()
+
+update = False
+if len(sys.argv) > 1 and sys.argv[1] == 'force':
+    update = True
+
+if SW_MAJOR < sw['major_version']: update = True
+if SW_MAJOR == sw['major_version'] and SW_MINOR < sw['minor_version']: update = True
+if SW_MAJOR == sw['major_version'] and SW_MINOR == sw['minor_version'] and SW_DEBUG < sw['debug_version']: update = True
+
+if update:
+    api.logger.info(f'Updating Scoreboard Software from {SW_MAJOR}.{SW_MINOR}.{SW_DEBUG} to {sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}')
+    print("Running software update")
+
+    api.logger.debug("Downloading")
+    urllib.request.urlretrieve(sw['download_url'], "/tmp/sw_update.tgz")
+
+    api.logger.debug("Mounting Boot Drive")
+    os.system("mkdir /media/boot")
+    os.system("mount /dev/mmcblk0p1 /media/boot")
+
+    api.logger.debug("Installing")
+    os.system("tar -xf /tmp/sw_update.tgz -C /media/boot")
+
+    if os.path.exists("/media/boot/post_install"):
+        api.logger.info("Running post install script")
+        os.system("/media/boot/post_install")
+        os.remove("/media/boot/post_install")
+
+    api.logger.debug("Rebooting")
+    print("Done")
+    os.system("umount /media/boot")
+    os.system("reboot")
+
+else:
+    print('No updates available')

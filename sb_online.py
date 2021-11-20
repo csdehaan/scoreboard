@@ -2,9 +2,10 @@
 
 from time import sleep
 from datetime import datetime, timedelta
+from multiprocessing.connection import Client
 
+from version import Version
 from config import Config
-from display import Display
 from controller import Controller
 from api import Api
 from match import Match
@@ -14,18 +15,28 @@ import threading
 import subprocess
 import socket
 
+next_match_teams = None
+
 config = Config()
 config.read()
 
 api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 20))
-
-api.logger.info(f'Scoreboard {config.scoreboard["serial"]} Online')
+api.logger.info(f'Scoreboard {config.scoreboard["serial"]} Ver {Version.str()} Online')
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.connect(("8.8.8.8", 80))
 api.logger.info(f'IP Address = {s.getsockname()[0]}')
 
-next_match_teams = None
+sb = api.scoreboard()
+logo_img = f'{sb["organization"]["abbrev"]}.png'
+if logo_img != config.display["logo"]:
+    config.display["logo"] = logo_img
+    config.save()
+
+court = sb['court']
+if court != config.scoreboard["court"]:
+    config.scoreboard["court"] = court
+    config.save()
 
 def update_clock():
     global display
@@ -33,7 +44,7 @@ def update_clock():
 
     if controller.status() == 'no_matches':
         threading.Timer(10, update_clock).start()
-        display.update_clock()
+        display.send(['clock'])
 
 
 def update_score():
@@ -43,7 +54,7 @@ def update_score():
 
     try:
         api.logger.debug(f'update_score: match={match.info}')
-        display.update_match(match)
+        display.send(['match', match])
         controller.set_t1_name(match.team1())
         controller.set_t2_name(match.team2())
         controller.set_score(match.team1_score(), match.team2_score(), match.server())
@@ -67,7 +78,7 @@ def next_match_now():
     countdown = config.scoreboard.getint('next_match_wait', 600)
     while countdown >= 0:
         if next_match_teams and controller.status() == 'selecting':
-            display.update_next_match(next_match_teams, countdown)
+            display.send('next_match', next_match_teams, countdown])
         countdown -= 1
         sleep(1)
     next_match_teams = None
@@ -224,8 +235,7 @@ def bt_button(value, options):
         controller.set_status_scoring()
 
 
-sb = api.scoreboard()
-display = Display(config, f'{sb["organization"]["abbrev"]}.png', sb['court'])
+display = Client(('localhost', 6000), authkey=b'vbscores')
 
 api.logger.debug('Enabling bluetooth')
 controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)
@@ -244,7 +254,7 @@ if matches:
     if len(matches['names']) > 0:
         api.logger.debug(f'set_status_selecting')
         controller.set_status_selecting(matches)
-        display.update_next_match(matches['teams'][0])
+        display.send('next_match', matches['teams'][0], -1])
     else:
         controller.set_status_no_matches()
         update_clock()

@@ -3,33 +3,27 @@
 import os
 import sys
 import urllib.request
-import json
 from api import Api
 from config import Config
+from version import Version
 
 
 config = Config()
 config.read()
 
 api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 10))
-
-
-SW_MAJOR = 1
-SW_MINOR = 0
-SW_DEBUG = 0
-
 sw = api.scoreboard_software()
 
 update = False
 if len(sys.argv) > 1 and sys.argv[1] == 'force':
     update = True
 
-if SW_MAJOR < sw['major_version']: update = True
-if SW_MAJOR == sw['major_version'] and SW_MINOR < sw['minor_version']: update = True
-if SW_MAJOR == sw['major_version'] and SW_MINOR == sw['minor_version'] and SW_DEBUG < sw['debug_version']: update = True
+if Version.major < sw['major_version']: update = True
+if Version.major == sw['major_version'] and Version.minor < sw['minor_version']: update = True
+if Version.major == sw['major_version'] and Version.minor == sw['minor_version'] and Version.debug < sw['debug_version']: update = True
 
 if update:
-    api.logger.info(f'Updating Scoreboard Software from {SW_MAJOR}.{SW_MINOR}.{SW_DEBUG} to {sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}')
+    api.logger.info(f'Updating Scoreboard Software from {Version.str()} to {sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}')
     print("Running software update")
 
     api.logger.debug("Downloading")

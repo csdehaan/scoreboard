@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from config import Config
-from display import Display
 from controller import Controller
 from match import Match
+
 import threading
+from multiprocessing.connection import Client
 
 
 def update_clock():
@@ -13,7 +13,7 @@ def update_clock():
 
     if controller.status() == 'waiting':
         threading.Timer(10, update_clock).start()
-        display.update_clock()
+        display.send(['clock'])
 
 
 def update_score():
@@ -21,7 +21,7 @@ def update_score():
     global controller
     global match
 
-    display.update_match(match)
+    display.send(['match', match])
     controller.set_score(match.team1_score(), match.team2_score(), match.server())
 
 
@@ -51,11 +51,8 @@ def bt_button(value, options):
         update_score()
 
 
+display = Client(('localhost', 6000), authkey=b'vbscores')
 
-config = Config()
-config.read()
-
-display = Display(config, config.display['logo'], config.scoreboard['court'])
 controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)
 match = Match()
 

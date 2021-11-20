@@ -2,10 +2,14 @@
 from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 from PIL import Image
 from datetime import datetime
+from multiprocessing.connection import Listener
+
+from config import Config
+from match import Match
 
 class Display:
 
-    def __init__(self, config, logo_img, court):
+    def __init__(self, config):
         options = RGBMatrixOptions()
         options.drop_privileges = False
         options.rows = config.display.getint("rows")
@@ -21,19 +25,8 @@ class Display:
         options.gpio_slowdown = config.display.getint("gpio_slowdown", 1)
         options.limit_refresh_rate_hz = config.display.getint("limit_refresh", 0)
 
-        if logo_img != config.display["logo"]:
-            config.display["logo"] = logo_img
-            config.save()
-        try:
-            self.logo = Image.open(f'/usr/share/scoreboard/{config.display["logo"]}').convert('RGB')
-        except:
-            self.logo = Image.open("/usr/share/scoreboard/vbs.png").convert('RGB')
-
-        self.court = str(court)
-        if self.court != config.scoreboard["court"]:
-            config.scoreboard["court"] = self.court
-            config.save()
-
+        self.load_logo(config.display["logo"])
+        self.court = config.scoreboard["court"]
         self.matrix = RGBMatrix(options = options)
         self.canvas = self.matrix.CreateFrameCanvas()
 
@@ -60,6 +53,13 @@ class Display:
         self.score_color = graphics.Color(int(r), int(g), int(b))
         [r,g,b] = config.display["divide_line_color"].split(",")
         self.divide_line_color = graphics.Color(int(r), int(g), int(b))
+
+
+    def load_logo(self, file):
+        try:
+            self.logo = Image.open(f'/usr/share/scoreboard/{file}').convert('RGB')
+        except:
+            self.logo = Image.open("/usr/share/scoreboard/vbs.png").convert('RGB')
 
 
     def draw_player_name(self, name, x, y, server):
@@ -103,20 +103,20 @@ class Display:
         self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
 
-    def update_next_match(self, teams, countdown=None):
-        if countdown:
-            next_match = f'NEXT: {int(countdown/60):2}:{(countdown%60):02}'.center(16)
+    def update_next_match(self, teams, countdown=-1):
+        if int(countdown) > 0:
+            next_match = f'NEXT: {int(countdown/60):2}:{(int(countdown)%60):02}'.center(16)
         else:
             next_match = "NEXT MATCH:".center(16)
 
         try:
             team1 = teams[0][0:16]
         except:
-            team1 = 'N/A'
+            team1 = 'TBD'
         try:
             team2 = teams[1][0:16]
         except:
-            team2 = 'N/A'
+            team2 = 'TBD'
 
         team1x = 0 if len(team1) % 2 == 0 else 3
         team2x = 0 if len(team2) % 2 == 0 else 3
@@ -127,4 +127,57 @@ class Display:
         self.draw_player_name("VS".center(16), 0, 23, False)
         self.draw_player_name(team2.center(16), team2x, 31, False)
         self.canvas = self.matrix.SwapOnVSync(self.canvas)
+
+
+    def show_message(self, msg):
+        self.canvas.Clear()
+        if len(msg) == 1:
+            graphics.DrawText(self.canvas, self.score_font, 1, 18, msg[0].center(16)
+        if len(msg) == 2:
+            graphics.DrawText(self.canvas, self.score_font, 1, 14, msg[0].center(16)
+            graphics.DrawText(self.canvas, self.score_font, 1, 24, msg[1].center(16)
+        if len(msg) == 3:
+            graphics.DrawText(self.canvas, self.score_font, 1, 10, msg[0].center(16)
+            graphics.DrawText(self.canvas, self.score_font, 1, 20, msg[1].center(16)
+            graphics.DrawText(self.canvas, self.score_font, 1, 30, msg[2].center(16)
+        self.canvas = self.matrix.SwapOnVSync(self.canvas)
+
+
+
+config = Config()
+config.read()
+
+display = Display(config)
+
+listener = Listener(('localhost', 6000), authkey=b'vbscores')
+running = True
+while running:
+    conn = listener.accept()
+
+    try:
+        while True:
+            msg = conn.recv()
+            if msg[0] == 'clock':
+                display.update_clock()
+            if msg[0] == 'match':
+                display.update_match(msg[1])
+            if msg[0] == 'next_match':
+                display.update_next_match(msg[1], msg[2])
+            if msg[0] == 'court':
+                display.court = msg[1]
+            if msg[0] == 'logo':
+                display.load_logo(msg[1])
+            if msg[0] == 'mesg':
+                display.show_message(msg[1:4])
+            if msg[0] == 'close':
+                conn.close()
+                break
+            if msg[0] == 'shutdown':
+                conn.close()
+                running = False
+                break
+    except:
+        pass
+
+listener.close()
 

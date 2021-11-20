@@ -4,9 +4,11 @@ import RPi.GPIO as GPIO
 from time import sleep
 import subprocess
 from config import Config
+from multiprocessing.connection import Client
 
 process = None
 mode = None
+display_process = subprocess.Popen(["python3","/bin/display.py"])
 
 def switch_toggled(channel):
     global process
@@ -35,6 +37,9 @@ while True:
     try:
 
         if GPIO.input(15) == 0:
+            display = Client(('localhost', 6000), authkey=b'vbscores')
+            display.send(['mesg', 'Connecting ...'])
+            display.send(['close'])
             print('Starting Online Mode')
 
             # online mode

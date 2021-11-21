@@ -1,7 +1,7 @@
 
 class Version:
     major = 1
-    minor = 0
+    minor = 1
     debug = 0
 
     def str():

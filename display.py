@@ -132,14 +132,14 @@ class Display:
     def show_message(self, msg):
         self.canvas.Clear()
         if len(msg) == 1:
-            graphics.DrawText(self.canvas, self.score_font, 1, 18, msg[0].center(16)
+            graphics.DrawText(self.canvas, self.score_font, 1, 18, msg[0].center(16))
         if len(msg) == 2:
-            graphics.DrawText(self.canvas, self.score_font, 1, 14, msg[0].center(16)
-            graphics.DrawText(self.canvas, self.score_font, 1, 24, msg[1].center(16)
+            graphics.DrawText(self.canvas, self.score_font, 1, 14, msg[0].center(16))
+            graphics.DrawText(self.canvas, self.score_font, 1, 24, msg[1].center(16))
         if len(msg) == 3:
-            graphics.DrawText(self.canvas, self.score_font, 1, 10, msg[0].center(16)
-            graphics.DrawText(self.canvas, self.score_font, 1, 20, msg[1].center(16)
-            graphics.DrawText(self.canvas, self.score_font, 1, 30, msg[2].center(16)
+            graphics.DrawText(self.canvas, self.score_font, 1, 10, msg[0].center(16))
+            graphics.DrawText(self.canvas, self.score_font, 1, 20, msg[1].center(16))
+            graphics.DrawText(self.canvas, self.score_font, 1, 30, msg[2].center(16))
         self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
 

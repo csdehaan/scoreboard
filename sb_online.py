@@ -33,7 +33,7 @@ if logo_img != config.display["logo"]:
     config.display["logo"] = logo_img
     config.save()
 
-court = sb['court']
+court = str(sb['court'])
 if court != config.scoreboard["court"]:
     config.scoreboard["court"] = court
     config.save()
@@ -78,7 +78,7 @@ def next_match_now():
     countdown = config.scoreboard.getint('next_match_wait', 600)
     while countdown >= 0:
         if next_match_teams and controller.status() == 'selecting':
-            display.send('next_match', next_match_teams, countdown])
+            display.send(['next_match', next_match_teams, countdown])
         countdown -= 1
         sleep(1)
     next_match_teams = None
@@ -254,7 +254,7 @@ if matches:
     if len(matches['names']) > 0:
         api.logger.debug(f'set_status_selecting')
         controller.set_status_selecting(matches)
-        display.send('next_match', matches['teams'][0], -1])
+        display.send(['next_match', matches['teams'][0], -1])
     else:
         controller.set_status_no_matches()
         update_clock()

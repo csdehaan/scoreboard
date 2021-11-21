@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from config import Config
 from controller import Controller
 from match import Match
 
@@ -50,6 +51,9 @@ def bt_button(value, options):
         match.team2_subtract_point()
         update_score()
 
+
+config = Config()
+config.read()
 
 display = Client(('localhost', 6000), authkey=b'vbscores')
 

@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 
-import RPi.GPIO as GPIO
+import sys
+print(sys.argv)
+if len(sys.argv) > 1:
+    qt = True
+    configfile = sys.argv[1]
+else:
+    qt = False
+
+if not qt:
+    import RPi.GPIO as GPIO
 from time import sleep
 import subprocess
 from config import Config
@@ -8,7 +17,10 @@ from multiprocessing.connection import Client
 
 process = None
 mode = None
-display_process = subprocess.Popen(["python3","/bin/display.py"])
+if qt:
+    display_process = subprocess.Popen(["python","./qt_display.py",configfile])
+else:
+    display_process = subprocess.Popen(["python3","/bin/display.py"])
 
 def switch_toggled(channel):
     global process
@@ -21,14 +33,18 @@ def switch_toggled(channel):
 
 
 # copy the config file into the root filesystem
-config = Config()
+if qt:
+    config = Config(configfile)
+else:
+    config = Config()
 config.load()
 
-# setup the online / offline switch
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(15, GPIO.IN, GPIO.PUD_UP)
-GPIO.add_event_detect(15, GPIO.BOTH, callback=switch_toggled, bouncetime=500)
+if not qt:
+    # setup the online / offline switch
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(15, GPIO.IN, GPIO.PUD_UP)
+    GPIO.add_event_detect(15, GPIO.BOTH, callback=switch_toggled, bouncetime=500)
 
 
 
@@ -36,7 +52,18 @@ GPIO.add_event_detect(15, GPIO.BOTH, callback=switch_toggled, bouncetime=500)
 while True:
     try:
 
-        if GPIO.input(15) == 0:
+        if qt:
+            display = Client(('localhost', 6000), authkey=b'vbscores')
+            display.send(['mesg', 'Connecting ...'])
+            display.send(['close'])
+            print('Starting QT Mode')
+
+            # start the app
+            process = subprocess.Popen(["python","./sb_qt.py",configfile])
+            process.wait()
+            print('QT Mode Exited')
+
+        elif GPIO.input(15) == 0:
             display = Client(('localhost', 6000), authkey=b'vbscores')
             display.send(['mesg', 'Connecting ...'])
             display.send(['close'])

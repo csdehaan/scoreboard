@@ -122,7 +122,7 @@ def rx_config_update(message):
         m = json.loads(message)
         rc = subprocess.run(m['cmd'].split(' '), capture_output=True)
         api.logger.info(rc)
-        
+
 
     except Exception as e:
         api.logger.error(f'rx_config_update exception: {e}')
@@ -235,7 +235,7 @@ def bt_button(value, options):
         controller.set_status_scoring()
 
 
-display = Client(('localhost', 6000), authkey=b'vbscores')
+display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
 
 api.logger.debug('Enabling bluetooth')
 controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)

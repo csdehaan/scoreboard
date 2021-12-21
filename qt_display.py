@@ -15,6 +15,7 @@ class Display(Qt.QApplication):
         super().__init__([])
         self.win = Qt.QDialog()
         self.win.resize(500, 150)
+        self.win.move(config.display.getint("window_x", 100), config.display.getint("window_y", 100))
         self.main_layout = QtWidgets.QVBoxLayout(self.win)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.score_widget = QtWidgets.QWidget(self.win)
@@ -74,7 +75,7 @@ class Display(Qt.QApplication):
         self.team2_score.setDigitCount(2)
         self.scores.addWidget(self.team2_score)
         self.score_layout.addLayout(self.scores)
-        
+
         self.mesg_widget = QtWidgets.QWidget(self.win)
         self.main_layout.addWidget(self.mesg_widget)
         self.mesg_layout = QtWidgets.QVBoxLayout(self.mesg_widget)
@@ -163,10 +164,9 @@ class Display(Qt.QApplication):
         self.mesg_widget.show()
 
 
-def listen(disp):
-    print('display listener')
-    display = disp    
-    listener = Listener(('localhost', 6000), authkey=b'vbscores')
+def listen(disp, port):
+    display = disp
+    listener = Listener(('localhost', port), authkey=b'vbscores')
     running = True
     while running:
         conn = listener.accept()
@@ -205,7 +205,7 @@ config.read()
 
 display = Display(config)
 
-listen_thread = Thread(target=listen, args=(display,))
+listen_thread = Thread(target=listen, args=(display,config.display.getint("port", 6000)))
 listen_thread.start()
 
 display.win.show()

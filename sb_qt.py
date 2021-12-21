@@ -72,8 +72,10 @@ def next_match_now():
     while countdown >= 0:
         if next_match_teams and status == 'selecting':
             display.send(['next_match', next_match_teams, countdown])
-        countdown -= 1
-        sleep(1)
+            countdown -= 1
+            sleep(1)
+        else:
+            countdown = 0
     next_match_teams = None
 
 
@@ -115,7 +117,7 @@ def rx_config_update(message):
         m = json.loads(message)
         rc = subprocess.run(m['cmd'].split(' '), capture_output=True)
         api.logger.info(rc)
-        
+
 
     except Exception as e:
         api.logger.error(f'rx_config_update exception: {e}')
@@ -172,7 +174,7 @@ def match_list():
     return {'names': [], 'ids': [], 'teams': []}
 
 
-display = Client(('localhost', 6000), authkey=b'vbscores')
+display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
 
 match = Match()
 
@@ -193,5 +195,5 @@ if matches:
         status = "no_matches"
         update_clock()
 
-# wait for display process to exit
-sleep(1000)
+while True:
+    sleep(5)

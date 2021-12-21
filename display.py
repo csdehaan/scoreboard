@@ -149,7 +149,7 @@ config.read()
 
 display = Display(config)
 
-listener = Listener(('localhost', 6000), authkey=b'vbscores')
+listener = Listener(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
 running = True
 while running:
     conn = listener.accept()
@@ -176,8 +176,8 @@ while running:
                 conn.close()
                 running = False
                 break
-    except:
-        pass
+    except Exception as e:
+        print(e)
 
 listener.close()
 

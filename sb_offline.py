@@ -55,7 +55,7 @@ def bt_button(value, options):
 config = Config()
 config.read()
 
-display = Client(('localhost', 6000), authkey=b'vbscores')
+display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
 
 controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)
 match = Match()

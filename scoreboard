@@ -85,6 +85,7 @@ while running:
             sleep(0.25)
 
             # enable wifi
+            subprocess.run(["killall", "-q", "wpa_supplicant"])
             with open('/etc/wpa_supplicant.conf', "w") as outfile:
                 subprocess.run(["wpa_passphrase", config.wifi["ssid"], config.wifi["password"]], stdout=outfile)
                 subprocess.run(["cat", "/etc/wpa_supplicant.base"], stdout=outfile)

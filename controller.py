@@ -16,11 +16,11 @@ BUTTON_PRESS_UUID = 'ff950010-09cc-4150-bf5b-fcc751d720ad'
 
 class Controller(peripheral.Peripheral):
 
-    def __init__(self, name, button_cb):
+    def __init__(self, name, button_cb, t1_cb=None, t2_cb=None):
         super().__init__(list(adapter.Adapter.available())[0].address, local_name=name)
         self.add_service(srv_id=1, uuid=SB_SERVICE_UUID, primary=True)
-        self.add_characteristic(srv_id=1, chr_id=1, uuid=T1_NAME_UUID, value='Team 1'.encode(), notifying=False, flags=['notify','read'], notify_callback=self.notify_cb, read_callback=self.read_t1_name)
-        self.add_characteristic(srv_id=1, chr_id=2, uuid=T2_NAME_UUID, value='Team 2'.encode(), notifying=False, flags=['notify','read'], notify_callback=self.notify_cb, read_callback=self.read_t2_name)
+        self.add_characteristic(srv_id=1, chr_id=1, uuid=T1_NAME_UUID, value='Team 1'.encode(), notifying=False, flags=['notify','read','write','write-without-response'], notify_callback=self.notify_cb, read_callback=self.read_t1_name, write_callback=t1_cb)
+        self.add_characteristic(srv_id=1, chr_id=2, uuid=T2_NAME_UUID, value='Team 2'.encode(), notifying=False, flags=['notify','read','write','write-without-response'], notify_callback=self.notify_cb, read_callback=self.read_t2_name, write_callback=t2_cb)
         self.add_characteristic(srv_id=1, chr_id=3, uuid=SCORE_UUID, value=[0,0,0], notifying=False, flags=['notify','read'], notify_callback=self.notify_cb, read_callback=self.read_score)
         self.add_characteristic(srv_id=1, chr_id=4, uuid=STATUS_UUID, value=[0], notifying=False, flags=['notify','read'], notify_callback=self.notify_cb, read_callback=self.read_status)
         self.add_characteristic(srv_id=1, chr_id=5, uuid=ONLINE_UUID, value=[1], notifying=False, flags=['read'])
@@ -40,6 +40,8 @@ class Controller(peripheral.Peripheral):
         if stat == 3: return 'selecting'
         if stat == 4: return 'next_game'
         if stat == 6: return 'no_matches'
+        if stat == 11: return 'scoring'
+        if stat == 12: return 'waiting'
         return 'undefined'
 
 
@@ -99,12 +101,14 @@ class Controller(peripheral.Peripheral):
             if self.chars[STATUS_UUID]['char']: self.chars[STATUS_UUID]['char'].set_value(val)
 
 
-    def set_status_scoring(self):
-        self.set_status(1)
+    def set_status_scoring(self, online=True):
+        if online: self.set_status(1)
+        else: self.set_status(11)
 
 
-    def set_status_waiting(self):
-        self.set_status(2)
+    def set_status_waiting(self, online=True):
+        if online: self.set_status(2)
+        else: self.set_status(12)
 
 
     def set_status_selecting(self, matches={'names': ['No Matches Scheduled\t'], 'ids': [0]}):

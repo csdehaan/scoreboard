@@ -53,10 +53,14 @@ def bt_button(value, options):
         update_score()
     if value[0] == 60:
         value.pop(0)
-        match.team1(bytes(value).decode('utf8'))
+        name = bytes(value).decode('utf8')
+        match.team1(name)
+        controller.set_t1_name(name)
     if value[0] == 61:
         value.pop(0)
-        match.team2(bytes(value).decode('utf8'))
+        name = bytes(value).decode('utf8')
+        match.team2(name)
+        controller.set_t2_name(name)
 
 
 config = Config()

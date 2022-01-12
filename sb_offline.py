@@ -51,14 +51,12 @@ def bt_button(value, options):
     if value[0] == 55:
         match.team2_subtract_point()
         update_score()
-
-
-def bt_set_t1_name(value, options):
-    match.team1(value)
-
-
-def bt_set_t2_name(value, options):
-    match.team2(value)
+    if value[0] == 60:
+        value.pop(0)
+        match.team1(bytes(value).decode('utf8'))
+    if value[0] == 61:
+        value.pop(0)
+        match.team2(bytes(value).decode('utf8'))
 
 
 config = Config()
@@ -71,7 +69,7 @@ while display == None:
     except:
         sleep(0.25)
 
-controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button, bt_set_t1_name, bt_set_t2_name)
+controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)
 match = Match()
 
 controller.set_status_waiting(False)

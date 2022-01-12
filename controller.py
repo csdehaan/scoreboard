@@ -16,11 +16,11 @@ BUTTON_PRESS_UUID = 'ff950010-09cc-4150-bf5b-fcc751d720ad'
 
 class Controller(peripheral.Peripheral):
 
-    def __init__(self, name, button_cb, t1_cb=None, t2_cb=None):
+    def __init__(self, name, button_cb):
         super().__init__(list(adapter.Adapter.available())[0].address, local_name=name)
         self.add_service(srv_id=1, uuid=SB_SERVICE_UUID, primary=True)
-        self.add_characteristic(srv_id=1, chr_id=1, uuid=T1_NAME_UUID, value='Team 1'.encode(), notifying=False, flags=['notify','read','write','write-without-response'], notify_callback=self.notify_cb, read_callback=self.read_t1_name, write_callback=t1_cb)
-        self.add_characteristic(srv_id=1, chr_id=2, uuid=T2_NAME_UUID, value='Team 2'.encode(), notifying=False, flags=['notify','read','write','write-without-response'], notify_callback=self.notify_cb, read_callback=self.read_t2_name, write_callback=t2_cb)
+        self.add_characteristic(srv_id=1, chr_id=1, uuid=T1_NAME_UUID, value='Team 1'.encode(), notifying=False, flags=['notify','read'], notify_callback=self.notify_cb, read_callback=self.read_t1_name)
+        self.add_characteristic(srv_id=1, chr_id=2, uuid=T2_NAME_UUID, value='Team 2'.encode(), notifying=False, flags=['notify','read'], notify_callback=self.notify_cb, read_callback=self.read_t2_name)
         self.add_characteristic(srv_id=1, chr_id=3, uuid=SCORE_UUID, value=[0,0,0], notifying=False, flags=['notify','read'], notify_callback=self.notify_cb, read_callback=self.read_score)
         self.add_characteristic(srv_id=1, chr_id=4, uuid=STATUS_UUID, value=[0], notifying=False, flags=['notify','read'], notify_callback=self.notify_cb, read_callback=self.read_status)
         self.add_characteristic(srv_id=1, chr_id=5, uuid=ONLINE_UUID, value=[1], notifying=False, flags=['read'])

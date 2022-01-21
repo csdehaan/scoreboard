@@ -15,7 +15,6 @@ class Match:
     def reset(self):
         self.game_id = None
         self.set(0)
-        self.team1_left = True
         self.team1_score(0)
         self.team2_score(0)
         self.serving_order([1,3])
@@ -39,8 +38,10 @@ class Match:
             self.info['player1'] = ""
         if len(players) > 1:
             self.info['player2'] = players[1]
+            if len(self.team2().split('/')) > 1: self.serving_order([1,3,2,4])
         else:
             self.info['player2'] = ""
+            self.serving_order([1,3])
 
 
     def team2(self, name=None):
@@ -54,8 +55,10 @@ class Match:
             self.info['player3'] = ""
         if len(players) > 1:
             self.info['player4'] = players[1]
+            if len(self.team1().split('/')) > 1: self.serving_order([1,3,2,4])
         else:
             self.info['player4'] = ""
+            self.serving_order([1,3])
 
 
     def player1(self):
@@ -116,64 +119,3 @@ class Match:
 
     def serving_order(self, order):
         self.serve_order = deque(order)
-
-
-    def switch_sides(self):
-        self.team1_left = not self.team1_left
-
-
-    def left_score(self, score=None):
-        if self.team1_left:
-            return self.team1_score(score)
-        else:
-            return self.team2_score(score)
-
-
-    def right_score(self, score=None):
-        if self.team1_left:
-            return self.team2_score(score)
-        else:
-            return self.team1_score(score)
-
-
-    def left_server(self):
-        if self.team1_left:
-            return self.server() in [1,2]
-        else:
-            return self.server() in [3,4]
-
-
-    def right_server(self):
-        if self.team1_left:
-            return self.server() in [3,4]
-        else:
-            return self.server() in [1,2]
-
-
-    def left_add_point(self):
-        if self.team1_left:
-            self.team1_add_point()
-        else:
-            self.team2_add_point()
-
-
-    def right_add_point(self):
-        if self.team1_left:
-            self.team2_add_point()
-        else:
-            self.team1_add_point()
-
-
-    def left_subtract_point(self):
-        if self.team1_left:
-            self.team1_subtract_point()
-        else:
-            self.team2_subtract_point()
-
-
-    def right_subtract_point(self):
-        if self.team1_left:
-            self.team2_subtract_point()
-        else:
-            self.team1_subtract_point()
-

@@ -15,7 +15,7 @@ import threading
 import subprocess
 import socket
 
-next_match_teams = None
+countdown = 0
 
 config = Config()
 config.read()
@@ -28,7 +28,7 @@ s.connect(("8.8.8.8", 80))
 api.logger.info(f'IP Address = {s.getsockname()[0]}')
 
 sb = api.scoreboard()
-logo_img = f'{sb["organization"]["abbrev"]}.png'
+logo_img = sb["organization"]["abbrev"]
 if logo_img != config.display["logo"]:
     config.display["logo"] = logo_img
     config.save()
@@ -38,13 +38,24 @@ if court != config.scoreboard["court"]:
     config.scoreboard["court"] = court
     config.save()
 
-def update_clock():
+
+def periodic_update():
+    global countdown
     global display
     global controller
 
-    if controller.status() == 'no_matches':
-        threading.Timer(10, update_clock).start()
-        display.send(['clock'])
+    threading.Timer(10, periodic_update).start()
+    if countdown > 0: countdown -= 10
+    if controller.status() != 'scoring':
+        matches = match_list()
+        if matches:
+            if len(matches['names']) > 0:
+                api.logger.debug(f'set_status_selecting')
+                controller.set_status_selecting(matches)
+                display.send(['next_match', matches['teams'][0], countdown])
+            else:
+                controller.set_status_no_matches()
+                display.send(['clock'])
 
 
 def update_score():
@@ -63,25 +74,17 @@ def update_score():
         api.logger.error(f'update_score exception: {e}')
 
 
-def next_match_in(wait_time, teams):
-    global next_match_teams
-    next_match_teams = teams
+def next_match_in(wait_time):
     threading.Timer(wait_time, next_match_now).start()
 
 
 def next_match_now():
-    global next_match_teams
-    global display
+    global countdown
     global controller
     global config
 
+    controller.set_status_waiting()
     countdown = config.scoreboard.getint('next_match_wait', 600)
-    while countdown >= 0:
-        if next_match_teams and controller.status() == 'selecting':
-            display.send(['next_match', next_match_teams, countdown])
-        countdown -= 1
-        sleep(1)
-    next_match_teams = None
 
 
 def rx_score_update(message):
@@ -100,16 +103,8 @@ def rx_score_update(message):
             if m['games'][-1]['game_over?']:
                 controller.set_status_next_game()
         elif m['state'] == 'complete':
-            matches = match_list()
-            if len(matches['names']) > 0:
-                api.logger.debug(f'rx_score_update: set_status_selecting')
-                controller.set_status_selecting(matches)
-                update_score()
-                next_match_in(config.scoreboard.getint('end_match_delay', 60), matches['teams'][0])
-            else:
-                api.logger.debug(f'rx_score_update: set_status_no_matches')
-                controller.set_status_no_matches()
-                update_clock()
+            update_score()
+            next_match_in(config.scoreboard.getint('end_match_delay', 60))
 
     except Exception as e:
         api.logger.error(f'rx_score_update exception: {e}')
@@ -248,17 +243,7 @@ api.subscribe_score_updates(rx_score_update)
 api.logger.debug('Subscribing to config updates')
 api.subscribe_config_updates(rx_config_update)
 
-matches = match_list()
-api.logger.debug(f'scheduled matches: {matches}')
-if matches:
-    if len(matches['names']) > 0:
-        api.logger.debug(f'set_status_selecting')
-        controller.set_status_selecting(matches)
-        display.send(['next_match', matches['teams'][0], -1])
-    else:
-        controller.set_status_no_matches()
-        update_clock()
-
+periodic_update()
 log_cpu_temperature()
 
 controller.publish()

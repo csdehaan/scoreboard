@@ -14,6 +14,7 @@ import json
 import threading
 import subprocess
 import socket
+import sys
 
 restart_display = False
 countdown = 0
@@ -242,9 +243,8 @@ while display == None:
         display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
         if restart_display:
             display.send(['shutdown'])
-            sleep(1)
-            display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
-    except:
+            sys.exit(0)
+    except socket.error:
         sleep(0.25)
 
 api.logger.debug('Enabling bluetooth')

@@ -15,6 +15,7 @@ import threading
 import subprocess
 import socket
 
+restart_display = False
 countdown = 0
 
 config = Config()
@@ -32,11 +33,13 @@ logo_img = sb["organization"]["abbrev"]
 if logo_img != config.display["logo"]:
     config.display["logo"] = logo_img
     config.save()
+    restart_display = True
 
 court = str(sb['court'])
 if court != config.scoreboard["court"]:
     config.scoreboard["court"] = court
     config.save()
+    restart_display = True
 
 
 def periodic_update():
@@ -99,6 +102,9 @@ def rx_score_update(message):
         json2match(m, match)
         if m['state'] == 'in_progress':
             controller.set_status_scoring()
+            if m['games'][-1]['switch_sides?']:
+                display.send(['mesg','SWITCH','SIDES'])
+                sleep(5)
             update_score()
             if m['games'][-1]['game_over?']:
                 controller.set_status_next_game()
@@ -230,7 +236,16 @@ def bt_button(value, options):
         controller.set_status_scoring()
 
 
-display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
+display = None
+while display == None:
+    try:
+        display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
+        if restart_display:
+            display.send(['shutdown'])
+            sleep(1)
+            display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
+    except:
+        sleep(0.25)
 
 api.logger.debug('Enabling bluetooth')
 controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)

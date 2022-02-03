@@ -7,6 +7,8 @@ class Match:
     def __init__(self):
         self.info = {}
         self.info['mode'] = 'score'
+        self.info['t1_players'] = []
+        self.info['t2_players'] = []
         self.team1('Team 1')
         self.team2('Team 2')
         self.reset()
@@ -17,7 +19,6 @@ class Match:
         self.set(0)
         self.team1_score(0)
         self.team2_score(0)
-        self.serving_order([1,3])
         self.server(self.serve_order[0])
 
 
@@ -31,50 +32,33 @@ class Match:
         if name == None:
             return self.info['team1']
         self.info['team1'] = name.strip()
-        players = self.info['team1'].split('/')
-        if len(players) > 0:
-            self.info['player1'] = players[0]
+        self.info['t1_players'] = self.info['team1'].split('/')
+        if len(self.info['t1_players']) == len(self.info['t2_players']):
+            self.serving_order(sum(list(map(lambda x: [x,x+10], range(11,11+len(self.info['t1_players'])))), []))
         else:
-            self.info['player1'] = ""
-        if len(players) > 1:
-            self.info['player2'] = players[1]
-            if len(self.team2().split('/')) > 1: self.serving_order([1,3,2,4])
-        else:
-            self.info['player2'] = ""
-            self.serving_order([1,3])
+            self.serving_order([0])
 
 
     def team2(self, name=None):
         if name == None:
             return self.info['team2']
         self.info['team2'] = name.strip()
-        players = self.info['team2'].split('/')
-        if len(players) > 0:
-            self.info['player3'] = players[0]
+        self.info['t2_players'] = self.info['team2'].split('/')
+        if len(self.info['t1_players']) == len(self.info['t2_players']):
+            self.serving_order(sum(list(map(lambda x: [x,x+10], range(11,11+len(self.info['t2_players'])))), []))
         else:
-            self.info['player3'] = ""
-        if len(players) > 1:
-            self.info['player4'] = players[1]
-            if len(self.team1().split('/')) > 1: self.serving_order([1,3,2,4])
-        else:
-            self.info['player4'] = ""
-            self.serving_order([1,3])
+            self.serving_order([0])
 
 
-    def player1(self):
-        return self.info['player1']
-
-
-    def player2(self):
-        return self.info['player2']
-
-
-    def player3(self):
-        return self.info['player3']
-
-
-    def player4(self):
-        return self.info['player4']
+    def player(self, team, player):
+        try:
+            if team == 1:
+                return self.info['t1_players'][player-1]
+            if team == 2:
+                return self.info['t2_players'][player-1]
+        except:
+            pass
+        return None
 
 
     def team1_score(self, score=None):
@@ -97,14 +81,14 @@ class Match:
 
     def team1_add_point(self):
         self.info['team1_score'] += 1
-        if self.info['server'] in [3,4]:
+        if self.info['server'] in range(21,30):
             self.serve_order.rotate()
             self.info['server'] = self.serve_order[0]
 
 
     def team2_add_point(self):
         self.info['team2_score'] += 1
-        if self.info['server'] in [1,2]:
+        if self.info['server'] in range(11,20):
             self.serve_order.rotate()
             self.info['server'] = self.serve_order[0]
 

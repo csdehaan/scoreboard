@@ -30,7 +30,7 @@ class Display:
         self.court = config.scoreboard["court"]
         self.matrix = RGBMatrix(options = options)
 
-        if self.rows == 192:
+        if self.cols == 192:
             from canvas_192x64 import Canvas
         else:
             from canvas_96x32 import Canvas

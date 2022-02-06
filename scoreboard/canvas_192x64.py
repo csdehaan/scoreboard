@@ -103,7 +103,7 @@ class Canvas:
         except:
             team2 = 'TBD'
         try:
-            ref = teams[2][0:26]
+            ref = f'REF: {teams[2]}'[0:26]
         except:
             ref = 'REF: TBD'
 

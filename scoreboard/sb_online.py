@@ -21,6 +21,23 @@ controller = None
 match = None
 
 
+def display_send(mesg, timeout=1):
+    global display
+
+    ack = None
+    while ack != 'ack':
+        try:
+            display.send(mesg)
+            if display.poll(timeout):
+                ack = display.recv()
+            else:
+                raise EOFError
+        except:
+            display.send(['close'])
+            display.close()
+            display = Client(('localhost', 6000), authkey=b'vbscores')
+
+
 def periodic_update():
     global countdown
     global display
@@ -34,10 +51,10 @@ def periodic_update():
             if len(matches['names']) > 0:
                 api.logger.debug(f'set_status_selecting')
                 controller.set_status_selecting(matches)
-                display.send(['next_match', matches['teams'][0], countdown])
+                display_send(['next_match', matches['teams'][0], countdown])
             else:
                 controller.set_status_no_matches()
-                display.send(['clock'])
+                display_send(['clock'])
 
 
 def update_score():
@@ -47,7 +64,7 @@ def update_score():
 
     try:
         api.logger.debug(f'update_score: match={match.info}')
-        display.send(['match', match])
+        display_send(['match', match])
         controller.set_t1_name(match.team1())
         controller.set_t2_name(match.team2())
         controller.set_score(match.team1_score(), match.team2_score(), match.server())
@@ -82,7 +99,7 @@ def rx_score_update(message):
         if m['state'] == 'in_progress':
             controller.set_status_scoring()
             if m['games'][-1]['switch_sides?']:
-                display.send(['mesg','SWITCH','SIDES'])
+                display_send(['mesg','SWITCH','SIDES'])
                 sleep(5)
             update_score()
             if m['games'][-1]['game_over?']:
@@ -257,10 +274,11 @@ def sb_online():
 
     while display == None:
         try:
-            display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
+            display = Client(('localhost', 6000), authkey=b'vbscores')
             if restart_display:
                 display.send(['shutdown'])
-                sys.exit(0)
+                sleep(1)
+                display = Client(('localhost', 6000), authkey=b'vbscores')
         except socket.error:
             sleep(0.25)
 

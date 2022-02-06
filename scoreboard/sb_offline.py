@@ -6,10 +6,27 @@ from time import sleep
 import threading
 from multiprocessing.connection import Client
 
-
 display = None
 controller = None
 match = None
+
+
+def display_send(mesg, timeout=1):
+    global display
+
+    ack = None
+    while ack != 'ack':
+        try:
+            display.send(mesg)
+            if display.poll(timeout):
+                ack = display.recv()
+            else:
+                raise EOFError
+        except:
+            display.send(['close'])
+            display.close()
+            display = Client(('localhost', 6000), authkey=b'vbscores')
+
 
 def update_clock():
     global display
@@ -17,7 +34,7 @@ def update_clock():
 
     if controller.status() == 'waiting':
         threading.Timer(10, update_clock).start()
-        display.send(['clock'])
+        display_send(['clock'])
 
 
 def update_score():
@@ -25,7 +42,7 @@ def update_score():
     global controller
     global match
 
-    display.send(['match', match])
+    display_send(['match', match])
     controller.set_score(match.team1_score(), match.team2_score(), match.server())
 
 
@@ -75,7 +92,7 @@ def sb_offline():
 
     while display == None:
         try:
-            display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
+            display = Client(('localhost', 6000), authkey=b'vbscores')
         except:
             sleep(0.25)
 

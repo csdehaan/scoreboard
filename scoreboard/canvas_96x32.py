@@ -28,7 +28,9 @@ class Canvas:
         self.mesg_color = graphics.Color(255, 191, 0)
 
 
-    def draw_player_name(self, name, x, y, server):
+    def draw_player_name(self, name, max_length, x, y, server):
+        if name == None: return
+        name = name[0:max_length]
         color = self.player_name_color
         if server: color = self.server_color
         graphics.DrawText(self.canvas, self.player_name_font, x, y, color, name)
@@ -56,28 +58,28 @@ class Canvas:
     def draw_match(self, matrix, match):
         self.canvas.Clear()
         if match.player(1,3):
-            self.draw_player_name(match.player(1, 1)[0:6], 1, 8, match.server() == 11)
-            self.draw_player_name(match.player(1, 3)[0:6], 41, 8, match.server() == 13)
+            self.draw_player_name(match.player(1, 1), 6, 1, 8, match.server() == 11)
+            self.draw_player_name(match.player(1, 3), 6, 41, 8, match.server() == 13)
         else:
-            self.draw_player_name(match.player(1, 1)[0:13], 1, 8, match.server() == 11)
+            self.draw_player_name(match.player(1, 1), 13, 1, 8, match.server() == 11)
 
         if match.player(1,4):
-            self.draw_player_name(match.player(1, 2)[0:6], 1, 14, match.server() == 12)
-            self.draw_player_name(match.player(1, 4)[0:6], 41, 14, match.server() == 14)
+            self.draw_player_name(match.player(1, 2), 6, 1, 14, match.server() == 12)
+            self.draw_player_name(match.player(1, 4), 6, 41, 14, match.server() == 14)
         else:
-            self.draw_player_name(match.player(1, 2)[0:13], 1, 14, match.server() == 12)
+            self.draw_player_name(match.player(1, 2), 13, 1, 14, match.server() == 12)
 
         if match.player(2,3):
-            self.draw_player_name(match.player(2, 1)[0:6], 1, 24, match.server() == 21)
-            self.draw_player_name(match.player(2, 3)[0:6], 41, 24, match.server() == 23)
+            self.draw_player_name(match.player(2, 1), 6, 1, 24, match.server() == 21)
+            self.draw_player_name(match.player(2, 3), 6, 41, 24, match.server() == 23)
         else:
-            self.draw_player_name(match.player(2, 1)[0:13], 1, 24, match.server() == 21)
+            self.draw_player_name(match.player(2, 1), 13, 1, 24, match.server() == 21)
 
         if match.player(2,4):
-            self.draw_player_name(match.player(2, 2)[0:6], 1, 30, match.server() == 22)
-            self.draw_player_name(match.player(2, 4)[0:6], 41, 30, match.server() == 24)
+            self.draw_player_name(match.player(2, 2), 6, 1, 30, match.server() == 22)
+            self.draw_player_name(match.player(2, 4), 6, 41, 30, match.server() == 24)
         else:
-            self.draw_player_name(match.player(2, 2)[0:13], 1, 30, match.server() == 22)
+            self.draw_player_name(match.player(2, 2), 13, 1, 30, match.server() == 22)
 
         self.draw_score(match.team1_score(), 80, 14)
         self.draw_score(match.team2_score(), 80, 29)
@@ -90,7 +92,7 @@ class Canvas:
         if int(countdown) > 0:
             next_match = f'NEXT: {int(countdown/60):2}:{(int(countdown)%60):02}'.center(16)
         else:
-            next_match = "NEXT MATCH:".center(16)
+            next_match = "NEXT MATCH:"
 
         try:
             team1 = teams[0][0:16]
@@ -101,26 +103,42 @@ class Canvas:
         except:
             team2 = 'TBD'
 
+        nextx = 0 if (len(next_match) % 2 == 0) else 3
         team1x = 0 if len(team1) % 2 == 0 else 3
         team2x = 0 if len(team2) % 2 == 0 else 3
 
         self.canvas.Clear()
-        self.draw_player_name(next_match, 3, 7, True)
-        self.draw_player_name(team1.center(16), team1x, 15, False)
-        self.draw_player_name("VS".center(16), 0, 23, False)
-        self.draw_player_name(team2.center(16), team2x, 31, False)
+        self.draw_player_name(next_match.center(16), 16, nextx, 7, True)
+        self.draw_player_name(team1.center(16), 16, team1x, 15, False)
+        self.draw_player_name("VS".center(16), 16, 0, 23, False)
+        self.draw_player_name(team2.center(16), 16, team2x, 31, False)
         self.canvas = matrix.SwapOnVSync(self.canvas)
 
 
     def draw_message(self, matrix, msg):
         self.canvas.Clear()
         if len(msg) == 1:
-            graphics.DrawText(self.canvas, self.mesg_font, 1, 18, self.mesg_color, msg[0].center(16))
+            [x,l] = [1,16] if (len(msg[0]) % 2 == 0) else [3,15]
+            graphics.DrawText(self.canvas, self.mesg_font, x, 18, self.mesg_color, msg[0].center(l))
         if len(msg) == 2:
-            graphics.DrawText(self.canvas, self.mesg_font, 1, 14, self.mesg_color, msg[0].center(16))
-            graphics.DrawText(self.canvas, self.mesg_font, 1, 24, self.mesg_color, msg[1].center(16))
+            [x,l] = [1,16] if (len(msg[0]) % 2 == 0) else [3,15]
+            graphics.DrawText(self.canvas, self.mesg_font, x, 14, self.mesg_color, msg[0].center(l))
+            [x,l] = [1,16] if (len(msg[1]) % 2 == 0) else [3,15]
+            graphics.DrawText(self.canvas, self.mesg_font, x, 24, self.mesg_color, msg[1].center(l))
         if len(msg) == 3:
-            graphics.DrawText(self.canvas, self.mesg_font, 1, 10, self.mesg_color, msg[0].center(16))
-            graphics.DrawText(self.canvas, self.mesg_font, 1, 20, self.mesg_color, msg[1].center(16))
-            graphics.DrawText(self.canvas, self.mesg_font, 1, 30, self.mesg_color, msg[2].center(16))
+            [x,l] = [1,16] if (len(msg[0]) % 2 == 0) else [3,15]
+            graphics.DrawText(self.canvas, self.mesg_font, x, 10, self.mesg_color, msg[0].center(l))
+            [x,l] = [1,16] if (len(msg[1]) % 2 == 0) else [3,15]
+            graphics.DrawText(self.canvas, self.mesg_font, x, 20, self.mesg_color, msg[1].center(l))
+            [x,l] = [1,16] if (len(msg[2]) % 2 == 0) else [3,15]
+            graphics.DrawText(self.canvas, self.mesg_font, x, 30, self.mesg_color, msg[2].center(l))
+        if len(msg) > 3:
+            [x,l] = [1,16] if (len(msg[0]) % 2 == 0) else [3,15]
+            graphics.DrawText(self.canvas, self.mesg_font, x, 14, self.mesg_color, msg[0].center(l))
+            [x,l] = [1,16] if (len(msg[1]) % 2 == 0) else [3,15]
+            graphics.DrawText(self.canvas, self.mesg_font, x, 30, self.mesg_color, msg[1].center(l))
+            [x,l] = [1,16] if (len(msg[2]) % 2 == 0) else [3,15]
+            graphics.DrawText(self.canvas, self.mesg_font, x, 46, self.mesg_color, msg[2].center(l))
+            [x,l] = [1,16] if (len(msg[3]) % 2 == 0) else [3,15]
+            graphics.DrawText(self.canvas, self.mesg_font, x, 62, self.mesg_color, msg[3].center(l))
         self.canvas = matrix.SwapOnVSync(self.canvas)

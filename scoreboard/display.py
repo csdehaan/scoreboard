@@ -68,7 +68,7 @@ def rgb_display():
 
     display = Display(config)
 
-    listener = Listener(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
+    listener = Listener(('0.0.0.0', config.display.getint("port", 6000)), authkey=b'vbscores')
     running = True
     while running:
         conn = listener.accept()
@@ -87,7 +87,7 @@ def rgb_display():
                 if msg[0] == 'logo':
                     display.load_logo(msg[1])
                 if msg[0] == 'mesg':
-                    display.show_message(msg[1:4])
+                    display.show_message(msg[1:5])
                 if msg[0] == 'close':
                     conn.close()
                     break
@@ -99,4 +99,3 @@ def rgb_display():
             print(e)
 
     listener.close()
-

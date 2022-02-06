@@ -23,7 +23,6 @@ def display_send(mesg, timeout=1):
             else:
                 raise EOFError
         except:
-            display.send(['close'])
             display.close()
             display = Client(('localhost', 6000), authkey=b'vbscores')
 

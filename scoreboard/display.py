@@ -78,22 +78,22 @@ def rgb_display():
                 msg = conn.recv()
                 if msg[0] == 'clock':
                     display.update_clock()
-                    display.send('ack')
+                    conn.send('ack')
                 if msg[0] == 'match':
                     display.update_match(msg[1])
-                    display.send('ack')
+                    conn.send('ack')
                 if msg[0] == 'next_match':
                     display.update_next_match(msg[1], msg[2])
-                    display.send('ack')
+                    conn.send('ack')
                 if msg[0] == 'court':
                     display.court = msg[1]
-                    display.send('ack')
+                    conn.send('ack')
                 if msg[0] == 'logo':
                     display.load_logo(msg[1])
-                    display.send('ack')
+                    conn.send('ack')
                 if msg[0] == 'mesg':
                     display.show_message(msg[1:5])
-                    display.send('ack')
+                    conn.send('ack')
                 if msg[0] == 'close':
                     conn.close()
                     break

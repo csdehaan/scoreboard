@@ -14,7 +14,7 @@ class Canvas:
         self.player_name_font = graphics.Font()
         self.player_name_font.LoadFont("/usr/share/scoreboard/fonts/BVM-12.bdf")
         self.score_font = graphics.Font()
-        self.score_font.LoadFont("/usr/share/scoreboard/fonts/BVM-20.bdf")
+        self.score_font.LoadFont("/usr/share/scoreboard/fonts/BVM-25.bdf")
         self.mesg_font = graphics.Font()
         self.mesg_font.LoadFont("/usr/share/scoreboard/fonts/BVM-16.bdf")
 

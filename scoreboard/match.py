@@ -8,6 +8,7 @@ class Match:
         self.info['mode'] = 'score'
         self.info['t1_players'] = []
         self.info['t2_players'] = []
+        self.info['referee'] = ''
         self.team1('Team 1')
         self.team2('Team 2')
         self.reset()
@@ -47,6 +48,13 @@ class Match:
             self.serving_order(sum(list(map(lambda x: [x,x+10], range(11,11+len(self.info['t2_players'])))), []))
         else:
             self.serving_order([0])
+
+
+    def referee(self, name=None):
+        if name == None:
+            return self.info['referee']
+        else:
+            self.info['referee'] = name
 
 
     def player(self, team, player):

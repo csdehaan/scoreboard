@@ -117,6 +117,10 @@ def json2match(js, match):
     match.server(js['games'][-1]['server_number'])
     match.game_id = js['games'][-1]['id']
     match.match_id = js['id']
+    try:
+        match.referee(js['referee']['name'])
+    except:
+        match.referee('')
 
 
 
@@ -137,11 +141,13 @@ def match_list():
                     try:
                         names.append(f'{js_match["name"]}\t[{datetime.strptime(js_match["scheduled_time"], "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%H:%M")}]')
                         ids.append(js_match["id"])
-                        teams.append([js_match['team1_name'],js_match['team2_name']])
+                        ref = js_match['referee']['name'] if 'referee' in js_match else 'TBD'
+                        teams.append([js_match['team1_name'],js_match['team2_name'],ref])
                     except:
                         names.append(f'{js_match["name"]}\t')
                         ids.append(js_match["id"])
-                        teams.append([js_match['team1_name'],js_match['team2_name']])
+                        ref = js_match['referee']['name'] if 'referee' in js_match else 'TBD'
+                        teams.append([js_match['team1_name'],js_match['team2_name'],ref])
                 if js_match['state'] == 'in_progress':
                     api.logger.debug(f'check_status_of_matches: match {js_match["id"]} in progress')
                     controller.set_status_scoring()

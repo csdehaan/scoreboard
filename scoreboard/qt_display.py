@@ -2,10 +2,8 @@
 from datetime import datetime
 from multiprocessing.connection import Listener
 from threading import Thread
-import sys
 
-from config import Config
-from match import Match
+from scoreboard import Config
 
 from PyQt5 import Qt, QtCore, QtWidgets
 
@@ -268,13 +266,14 @@ def listen(disp, port):
     listener.close()
 
 
-config = Config(sys.argv[1])
-config.read()
+def qt_display(config_file):
+    config = Config(config_file)
+    config.read()
 
-display = Display(config)
+    display = Display(config)
 
-listen_thread = Thread(target=listen, args=(display,config.display.getint("port", 6000)))
-listen_thread.start()
+    listen_thread = Thread(target=listen, args=(display,config.display.getint("port", 6000)))
+    listen_thread.start()
 
-display.win.show()
-display.exec_()
+    display.win.show()
+    display.exec_()

@@ -4,7 +4,7 @@ from PIL import Image
 from datetime import datetime
 from multiprocessing.connection import Listener
 
-from config import Config
+from scoreboard import Config
 
 class Display:
 
@@ -31,9 +31,9 @@ class Display:
         self.matrix = RGBMatrix(options = options)
 
         if self.cols == 192:
-            from canvas_192x64 import Canvas
+            from scoreboard.canvas_192x64 import Canvas
         else:
-            from canvas_96x32 import Canvas
+            from scoreboard.canvas_96x32 import Canvas
         self.canvas = Canvas(self.matrix.CreateFrameCanvas())
 
 
@@ -62,40 +62,41 @@ class Display:
 
 
 
-config = Config()
-config.read()
+def rgb_display():
+    config = Config()
+    config.read()
 
-display = Display(config)
+    display = Display(config)
 
-listener = Listener(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
-running = True
-while running:
-    conn = listener.accept()
+    listener = Listener(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
+    running = True
+    while running:
+        conn = listener.accept()
 
-    try:
-        while True:
-            msg = conn.recv()
-            if msg[0] == 'clock':
-                display.update_clock()
-            if msg[0] == 'match':
-                display.update_match(msg[1])
-            if msg[0] == 'next_match':
-                display.update_next_match(msg[1], msg[2])
-            if msg[0] == 'court':
-                display.court = msg[1]
-            if msg[0] == 'logo':
-                display.load_logo(msg[1])
-            if msg[0] == 'mesg':
-                display.show_message(msg[1:4])
-            if msg[0] == 'close':
-                conn.close()
-                break
-            if msg[0] == 'shutdown':
-                conn.close()
-                running = False
-                break
-    except Exception as e:
-        print(e)
+        try:
+            while True:
+                msg = conn.recv()
+                if msg[0] == 'clock':
+                    display.update_clock()
+                if msg[0] == 'match':
+                    display.update_match(msg[1])
+                if msg[0] == 'next_match':
+                    display.update_next_match(msg[1], msg[2])
+                if msg[0] == 'court':
+                    display.court = msg[1]
+                if msg[0] == 'logo':
+                    display.load_logo(msg[1])
+                if msg[0] == 'mesg':
+                    display.show_message(msg[1:4])
+                if msg[0] == 'close':
+                    conn.close()
+                    break
+                if msg[0] == 'shutdown':
+                    conn.close()
+                    running = False
+                    break
+        except Exception as e:
+            print(e)
 
-listener.close()
+    listener.close()
 

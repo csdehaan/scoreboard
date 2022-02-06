@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+
+import sys
+from scoreboard.qt_display import qt_display
+
+qt_display(sys.argv[1])

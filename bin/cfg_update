@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+
+import sys
+from scoreboard.cfg_update import cfg_update
+
+cfg_update(sys.argv)

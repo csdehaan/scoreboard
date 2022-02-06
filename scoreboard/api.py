@@ -4,7 +4,7 @@ import urllib.request
 import json
 from actioncable.connection import Connection
 from actioncable.subscription import Subscription
-import logger
+from scoreboard import logger
 
 SERVER = "vb-scores.com"
 HTTP = "https"
@@ -77,7 +77,7 @@ class Api:
 
     def team2_plus(self, game_id):
         if game_id:
-    	    response = urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/team2_score_plus.json?api_key='+self.api_key).read().decode()
+            response = urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/team2_score_plus.json?api_key='+self.api_key).read().decode()
 
 
 

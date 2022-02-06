@@ -1,13 +1,15 @@
-#!/usr/bin/env python3
 
-from config import Config
-from controller import Controller
-from match import Match
+from scoreboard import Config, Match
+from scoreboard.controller import Controller
 from time import sleep
 
 import threading
 from multiprocessing.connection import Client
 
+
+display = None
+controller = None
+match = None
 
 def update_clock():
     global display
@@ -63,20 +65,23 @@ def bt_button(value, options):
         controller.set_t2_name(name)
 
 
-config = Config()
-config.read()
+def sb_offline():
+    global display
+    global controller
+    global match
 
-display = None
-while display == None:
-    try:
-        display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
-    except:
-        sleep(0.25)
+    config = Config()
+    config.read()
 
-controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)
-match = Match()
+    while display == None:
+        try:
+            display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
+        except:
+            sleep(0.25)
 
-controller.set_status_waiting(False)
-update_clock()
-controller.publish()
+    controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)
+    match = Match()
 
+    controller.set_status_waiting(False)
+    update_clock()
+    controller.publish()

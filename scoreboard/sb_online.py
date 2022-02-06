@@ -1,14 +1,11 @@
-#!/usr/bin/env python3
 
 from time import sleep
 from datetime import datetime, timedelta
 from multiprocessing.connection import Client
 
-from version import Version
-from config import Config
-from controller import Controller
-from api import Api
-from match import Match
+from scoreboard import Version, Match, Config
+from scoreboard.controller import Controller
+from scoreboard.api import Api
 
 import json
 import threading
@@ -18,29 +15,11 @@ import sys
 
 restart_display = False
 countdown = 0
-
-config = Config()
-config.read()
-
-api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 20))
-api.logger.info(f'Scoreboard {config.scoreboard["serial"]} Ver {Version.str()} Online')
-
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.connect(("8.8.8.8", 80))
-api.logger.info(f'IP Address = {s.getsockname()[0]}')
-
-sb = api.scoreboard()
-logo_img = sb["organization"]["abbrev"]
-if logo_img != config.display["logo"]:
-    config.display["logo"] = logo_img
-    config.save()
-    restart_display = True
-
-court = str(sb['court'])
-if court != config.scoreboard["court"]:
-    config.scoreboard["court"] = court
-    config.save()
-    restart_display = True
+display = None
+config = None
+api = None
+controller = None
+match = None
 
 
 def periodic_update():
@@ -237,29 +216,60 @@ def bt_button(value, options):
         controller.set_status_scoring()
 
 
-display = None
-while display == None:
-    try:
-        display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
-        if restart_display:
-            display.send(['shutdown'])
-            sys.exit(0)
-    except socket.error:
-        sleep(0.25)
 
-api.logger.debug('Enabling bluetooth')
-controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)
+def sb_online():
+    global api
+    global controller
+    global match
+    global countdown
+    global config
+    global display
 
-match = Match()
+    config = Config()
+    config.read()
 
-api.logger.debug('Subscribing to score updates')
-api.subscribe_score_updates(rx_score_update)
+    api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 20))
+    api.logger.info(f'Scoreboard {config.scoreboard["serial"]} Ver {Version.str()} Online')
 
-api.logger.debug('Subscribing to config updates')
-api.subscribe_config_updates(rx_config_update)
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    api.logger.info(f'IP Address = {s.getsockname()[0]}')
 
-periodic_update()
-log_cpu_temperature()
+    sb = api.scoreboard()
+    logo_img = sb["organization"]["abbrev"]
+    if logo_img != config.display["logo"]:
+        config.display["logo"] = logo_img
+        config.save()
+        restart_display = True
 
-controller.publish()
+    court = str(sb['court'])
+    if court != config.scoreboard["court"]:
+        config.scoreboard["court"] = court
+        config.save()
+        restart_display = True
+
+    while display == None:
+        try:
+            display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
+            if restart_display:
+                display.send(['shutdown'])
+                sys.exit(0)
+        except socket.error:
+            sleep(0.25)
+
+    api.logger.debug('Enabling bluetooth')
+    controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)
+
+    match = Match()
+
+    api.logger.debug('Subscribing to score updates')
+    api.subscribe_score_updates(rx_score_update)
+
+    api.logger.debug('Subscribing to config updates')
+    api.subscribe_config_updates(rx_config_update)
+
+    periodic_update()
+    log_cpu_temperature()
+
+    controller.publish()
 

@@ -55,12 +55,33 @@ class Canvas:
 
     def draw_match(self, matrix, match):
         self.canvas.Clear()
-        self.draw_player_name(match.player(1, 1)[0:13], 4, 16, match.server() == 11)
-        self.draw_player_name(match.player(1, 2)[0:13], 4, 28, match.server() == 12)
-        self.draw_player_name(match.player(2, 1)[0:13], 4, 48, match.server() == 21)
-        self.draw_player_name(match.player(2, 2)[0:13], 4, 60, match.server() == 22)
+        if match.player(1,3):
+            self.draw_player_name(match.player(1, 1)[0:10], 2, 15, match.server() == 11)
+            self.draw_player_name(match.player(1, 3)[0:10], 80, 15, match.server() == 13)
+        else:
+            self.draw_player_name(match.player(1, 1)[0:20], 2, 15, match.server() == 11)
+
+        if match.player(1,4):
+            self.draw_player_name(match.player(1, 2)[0:10], 2, 28, match.server() == 12)
+            self.draw_player_name(match.player(1, 4)[0:10], 80, 28, match.server() == 14)
+        else:
+            self.draw_player_name(match.player(1, 2)[0:20], 2, 28, match.server() == 12)
+
+        if match.player(2,3):
+            self.draw_player_name(match.player(2, 1)[0:10], 2, 48, match.server() == 21)
+            self.draw_player_name(match.player(2, 3)[0:10], 80, 48, match.server() == 23)
+        else:
+            self.draw_player_name(match.player(2, 1)[0:20], 2, 48, match.server() == 21)
+
+        if match.player(2,4):
+            self.draw_player_name(match.player(2, 2)[0:10], 2, 60, match.server() == 22)
+            self.draw_player_name(match.player(2, 4)[0:10], 80, 60, match.server() == 24)
+        else:
+            self.draw_player_name(match.player(2, 2)[0:20], 2, 60, match.server() == 22)
+
         self.draw_score(match.team1_score(), 158, 28)
         self.draw_score(match.team2_score(), 158, 58)
+
         graphics.DrawLine(self.canvas, 0, 32, 191, 32, self.divide_line_color)
         self.canvas = matrix.SwapOnVSync(self.canvas)
 

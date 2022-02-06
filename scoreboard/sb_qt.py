@@ -1,40 +1,22 @@
-#!/usr/bin/env python3
 
 from time import sleep
-from datetime import datetime, timedelta
+from datetime import datetime
 from multiprocessing.connection import Client
 
-from version import Version
-from config import Config
-from api import Api
-from match import Match
+from scoreboard import Version, Config, Match
+from scoreboard.api import Api
 
 import json
 import threading
 import subprocess
 import socket
-import sys
 
 status = 'undefined'
 countdown = 0
-
-config = Config(sys.argv[1])
-config.read()
-
-api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 20))
-api.logger.info(f'Scoreboard {config.scoreboard["serial"]} Ver {Version.str()} Online')
-
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.connect(("8.8.8.8", 80))
-api.logger.info(f'IP Address = {s.getsockname()[0]}')
-
-sb = api.scoreboard()
-
-court = str(sb['court'])
-if court != config.scoreboard["court"]:
-    config.scoreboard["court"] = court
-    config.save()
-
+display = None
+config = None
+api = None
+match = None
 
 def periodic_update():
     global countdown
@@ -166,17 +148,43 @@ def match_list():
     return {'names': [], 'ids': [], 'teams': []}
 
 
-display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
 
-match = Match()
+def sb_qt(config_file):
+    global countdown
+    global display
+    global status
+    global api
+    global match
+    global config
 
-api.logger.debug('Subscribing to score updates')
-api.subscribe_score_updates(rx_score_update)
+    config = Config(config_file)
+    config.read()
 
-api.logger.debug('Subscribing to config updates')
-api.subscribe_config_updates(rx_config_update)
+    api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 20))
+    api.logger.info(f'Scoreboard {config.scoreboard["serial"]} Ver {Version.str()} Online')
 
-periodic_update()
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    api.logger.info(f'IP Address = {s.getsockname()[0]}')
 
-while True:
-    sleep(5)
+    sb = api.scoreboard()
+
+    court = str(sb['court'])
+    if court != config.scoreboard["court"]:
+        config.scoreboard["court"] = court
+        config.save()
+
+    display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
+
+    match = Match()
+
+    api.logger.debug('Subscribing to score updates')
+    api.subscribe_score_updates(rx_score_update)
+
+    api.logger.debug('Subscribing to config updates')
+    api.subscribe_config_updates(rx_config_update)
+
+    periodic_update()
+
+    while True:
+        sleep(5)

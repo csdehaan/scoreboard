@@ -1,0 +1,5 @@
+#!/usr/bin/env python3
+
+from scoreboard.sb_online import sb_online
+
+sb_online()

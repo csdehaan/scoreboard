@@ -1,0 +1,5 @@
+#!/usr/bin/env python3
+
+from scoreboard.sb_offline import sb_offline
+
+sb_offline()

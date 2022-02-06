@@ -55,12 +55,33 @@ class Canvas:
 
     def draw_match(self, matrix, match):
         self.canvas.Clear()
-        self.draw_player_name(match.player(1, 1)[0:13], 2, 8, match.server() == 11)
-        self.draw_player_name(match.player(1, 2)[0:13], 2, 14, match.server() == 12)
-        self.draw_player_name(match.player(2, 1)[0:13], 2, 24, match.server() == 21)
-        self.draw_player_name(match.player(2, 2)[0:13], 2, 30, match.server() == 22)
-        self.draw_score(match.team1_score(), 79, 14)
-        self.draw_score(match.team2_score(), 79, 29)
+        if match.player(1,3):
+            self.draw_player_name(match.player(1, 1)[0:6], 1, 8, match.server() == 11)
+            self.draw_player_name(match.player(1, 3)[0:6], 41, 8, match.server() == 13)
+        else:
+            self.draw_player_name(match.player(1, 1)[0:13], 1, 8, match.server() == 11)
+
+        if match.player(1,4):
+            self.draw_player_name(match.player(1, 2)[0:6], 1, 14, match.server() == 12)
+            self.draw_player_name(match.player(1, 4)[0:6], 41, 14, match.server() == 14)
+        else:
+            self.draw_player_name(match.player(1, 2)[0:13], 1, 14, match.server() == 12)
+
+        if match.player(2,3):
+            self.draw_player_name(match.player(2, 1)[0:6], 1, 24, match.server() == 21)
+            self.draw_player_name(match.player(2, 3)[0:6], 41, 24, match.server() == 23)
+        else:
+            self.draw_player_name(match.player(2, 1)[0:13], 1, 24, match.server() == 21)
+
+        if match.player(2,4):
+            self.draw_player_name(match.player(2, 2)[0:6], 1, 30, match.server() == 22)
+            self.draw_player_name(match.player(2, 4)[0:6], 41, 30, match.server() == 24)
+        else:
+            self.draw_player_name(match.player(2, 2)[0:13], 1, 30, match.server() == 22)
+
+        self.draw_score(match.team1_score(), 80, 14)
+        self.draw_score(match.team2_score(), 80, 29)
+
         graphics.DrawLine(self.canvas, 0, 16, 95, 16, self.divide_line_color)
         self.canvas = matrix.SwapOnVSync(self.canvas)
 

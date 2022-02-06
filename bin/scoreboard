@@ -10,7 +10,7 @@ else:
 
 from time import sleep
 import subprocess
-from config import Config
+from scoreboard import Config
 from multiprocessing.connection import Client
 import signal
 
@@ -42,7 +42,7 @@ def sig_handler(signum, frame):
 if qt:
     signal.signal(signal.SIGTERM, sig_handler)
     signal.signal(signal.SIGINT, sig_handler)
-    display_process = subprocess.Popen(["python","./qt_display.py",configfile])
+    display_process = subprocess.Popen(["qt_display",configfile])
     config = Config(configfile)
 else:
     # setup the online / offline switch
@@ -50,8 +50,8 @@ else:
     GPIO.setmode(GPIO.BCM)
     GPIO.setup(15, GPIO.IN, GPIO.PUD_UP)
     GPIO.add_event_detect(15, GPIO.BOTH, callback=switch_toggled, bouncetime=500)
-
     config = Config()
+
 config.read()
 
 
@@ -66,7 +66,7 @@ while running:
             print('Starting QT Mode')
 
             # start the app
-            process = subprocess.Popen(["python","./sb_qt.py",configfile])
+            process = subprocess.Popen(["sb_qt",configfile])
             process.wait()
             display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
             display.send(['shutdown'])
@@ -91,7 +91,7 @@ while running:
             subprocess.run(["wpa_cli", "reconfigure"])
 
             # start the app
-            process = subprocess.Popen(["python3","/bin/sb_online.py"])
+            process = subprocess.Popen(["sb_online"])
             process.wait()
             print('Online Mode Exited')
 
@@ -100,7 +100,7 @@ while running:
 
             # offline mode
             mode = 'offline'
-            process = subprocess.Popen(["python3","/bin/sb_offline.py"])
+            process = subprocess.Popen(["sb_offline"])
             process.wait()
             print('Offline Mode Exited')
 

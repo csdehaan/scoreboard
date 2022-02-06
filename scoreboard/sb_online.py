@@ -13,7 +13,6 @@ import subprocess
 import socket
 import sys
 
-restart_display = False
 countdown = 0
 display = None
 config = None
@@ -224,6 +223,8 @@ def sb_online():
     global countdown
     global config
     global display
+
+    restart_display = False
 
     config = Config()
     config.read()

@@ -81,8 +81,24 @@ class Canvas:
         else:
             self.draw_player_name(match.player(2, 2), 13, 1, 30, match.server() == 22)
 
-        self.draw_score(match.team1_score(), 80, 14)
-        self.draw_score(match.team2_score(), 80, 29)
+        self.draw_score(match.team1_score(), 80, 12)
+        self.draw_score(match.team2_score(), 80, 28)
+
+        if match.team1_sets() > 0:
+            graphics.DrawLine(self.canvas, 91, 13, 92, 13, self.server_color)
+            graphics.DrawLine(self.canvas, 91, 14, 92, 14, self.server_color)
+
+        if match.team1_sets() > 1:
+            graphics.DrawLine(self.canvas, 86, 13, 87, 13, self.server_color)
+            graphics.DrawLine(self.canvas, 86, 14, 87, 14, self.server_color)
+
+        if match.team2_sets() > 0:
+            graphics.DrawLine(self.canvas, 91, 29, 92, 29, self.server_color)
+            graphics.DrawLine(self.canvas, 91, 30, 92, 30, self.server_color)
+
+        if match.team2_sets() > 1:
+            graphics.DrawLine(self.canvas, 86, 29, 87, 29, self.server_color)
+            graphics.DrawLine(self.canvas, 86, 30, 87, 30, self.server_color)
 
         graphics.DrawLine(self.canvas, 0, 16, 95, 16, self.divide_line_color)
         self.canvas = matrix.SwapOnVSync(self.canvas)

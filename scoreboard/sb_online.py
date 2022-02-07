@@ -11,7 +11,6 @@ import json
 import threading
 import subprocess
 import socket
-import sys
 
 countdown = 0
 display = None
@@ -19,6 +18,7 @@ config = None
 api = None
 controller = None
 match = None
+side_switch = False
 
 
 def display_send(mesg, timeout=1):
@@ -56,14 +56,21 @@ def periodic_update():
                 display_send(['clock'])
 
 
+def side_switch_clear():
+    global side_switch
+    side_switch = False
+    update_score()
+
+
 def update_score():
     global display
     global controller
     global match
+    global side_switch
 
     try:
         api.logger.debug(f'update_score: match={match.info}')
-        display_send(['match', match])
+        if side_switch == False: display_send(['match', match])
         controller.set_t1_name(match.team1())
         controller.set_t2_name(match.team2())
         controller.set_score(match.team1_score(), match.team2_score(), match.server())
@@ -89,6 +96,7 @@ def rx_score_update(message):
     global controller
     global match
     global config
+    global side_switch
 
     api.logger.debug(f'rx_score_update: message={message}')
 
@@ -99,7 +107,8 @@ def rx_score_update(message):
             controller.set_status_scoring()
             if m['games'][-1]['switch_sides?']:
                 display_send(['mesg','SWITCH','SIDES'])
-                sleep(5)
+                side_switch = True
+                threading.Timer(5, side_switch_clear).start()
             update_score()
             if m['games'][-1]['game_over?']:
                 controller.set_status_next_game()

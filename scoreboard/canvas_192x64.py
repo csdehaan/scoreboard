@@ -84,31 +84,31 @@ class Canvas:
         self.draw_score(match.team1_score(), 160, 23)
         self.draw_score(match.team2_score(), 160, 55)
 
-        graphics.DrawCircle(self.canvas, 183, 28, 3, self.divide_line_color)
-        graphics.DrawCircle(self.canvas, 172, 28, 3, self.divide_line_color)
+        graphics.DrawCircle(self.canvas, 183, 26, 2, self.divide_line_color)
+        graphics.DrawCircle(self.canvas, 173, 26, 2, self.divide_line_color)
 
-        graphics.DrawCircle(self.canvas, 183, 60, 3, self.divide_line_color)
-        graphics.DrawCircle(self.canvas, 172, 60, 3, self.divide_line_color)
+        graphics.DrawCircle(self.canvas, 183, 58, 2, self.divide_line_color)
+        graphics.DrawCircle(self.canvas, 173, 58, 2, self.divide_line_color)
 
         if match.team1_sets() > 0:
-            graphics.DrawCircle(self.canvas, 172, 28, 3, self.server_color)
-            graphics.DrawCircle(self.canvas, 172, 28, 2, self.server_color)
-            graphics.DrawCircle(self.canvas, 172, 28, 1, self.server_color)
+            graphics.DrawCircle(self.canvas, 173, 26, 2, self.server_color)
+            graphics.DrawCircle(self.canvas, 173, 26, 1, self.server_color)
+            graphics.DrawCircle(self.canvas, 173, 26, 0, self.server_color)
 
         if match.team1_sets() > 1:
-            graphics.DrawCircle(self.canvas, 183, 28, 3, self.server_color)
-            graphics.DrawCircle(self.canvas, 183, 28, 2, self.server_color)
-            graphics.DrawCircle(self.canvas, 183, 28, 1, self.server_color)
+            graphics.DrawCircle(self.canvas, 183, 26, 2, self.server_color)
+            graphics.DrawCircle(self.canvas, 183, 26, 1, self.server_color)
+            graphics.DrawCircle(self.canvas, 183, 26, 0, self.server_color)
 
         if match.team2_sets() > 0:
-            graphics.DrawCircle(self.canvas, 172, 60, 3, self.server_color)
-            graphics.DrawCircle(self.canvas, 172, 60, 2, self.server_color)
-            graphics.DrawCircle(self.canvas, 172, 60, 1, self.server_color)
+            graphics.DrawCircle(self.canvas, 173, 58, 2, self.server_color)
+            graphics.DrawCircle(self.canvas, 173, 58, 1, self.server_color)
+            graphics.DrawCircle(self.canvas, 173, 58, 0, self.server_color)
 
         if match.team2_sets() > 1:
-            graphics.DrawCircle(self.canvas, 183, 60, 3, self.server_color)
-            graphics.DrawCircle(self.canvas, 183, 60, 2, self.server_color)
-            graphics.DrawCircle(self.canvas, 183, 60, 1, self.server_color)
+            graphics.DrawCircle(self.canvas, 183, 58, 2, self.server_color)
+            graphics.DrawCircle(self.canvas, 183, 58, 1, self.server_color)
+            graphics.DrawCircle(self.canvas, 183, 58, 0, self.server_color)
 
         graphics.DrawLine(self.canvas, 0, 32, 191, 32, self.divide_line_color)
         self.canvas = matrix.SwapOnVSync(self.canvas)

@@ -128,6 +128,8 @@ def json2match(js, match):
     match.team1(js['team1_name'])
     match.team2(js['team2_name'])
     match.set(len(js['games']))
+    match.team1_sets(js['games_team1'])
+    match.team2_sets(js['games_team2'])
     match.team1_score(js['games'][-1]['team1_score'])
     match.team2_score(js['games'][-1]['team2_score'])
     match.server(js['games'][-1]['server_number'])

@@ -17,6 +17,8 @@ class Match:
     def reset(self):
         self.game_id = None
         self.set(0)
+        self.team1_sets(0)
+        self.team2_sets(0)
         self.team1_score(0)
         self.team2_score(0)
         self.server(self.serve_order[0])
@@ -68,10 +70,22 @@ class Match:
         return None
 
 
+    def team1_sets(self, sets=None):
+        if sets == None:
+            return self.info['team1_sets']
+        self.info['team1_sets'] = sets
+
+
     def team1_score(self, score=None):
         if score == None:
             return self.info['team1_score']
         self.info['team1_score'] = score
+
+
+    def team2_sets(self, sets=None):
+        if sets == None:
+            return self.info['team2_sets']
+        self.info['team2_sets'] = sets
 
 
     def team2_score(self, score=None):

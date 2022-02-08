@@ -1,6 +1,8 @@
 
 import os
 import urllib.request
+import hashlib
+import base64
 
 from scoreboard import Config, Version
 from scoreboard.api import Api
@@ -27,6 +29,15 @@ def software_update(force):
 
         api.logger.debug("Downloading")
         urllib.request.urlretrieve(sw['download_url'], "/tmp/sw_update.tgz")
+
+        # verify checksum
+        if str(sw['md5_sum']) != '':
+            with open("/tmp/sw_update.tgz", "rb") as f:
+                digest = hashlib.md5(f.read()).digest()
+                if base64.b64encode(digest).decode() == sw['md5_hash']:
+                    api.logger.info("Verified checksum")
+                else:
+                    api.logger.error(f'Failed to verify checksum ({base64.b64encode(digest).decode()})')
 
         api.logger.debug("Mounting Boot Drive")
         os.system("mkdir /media/boot")

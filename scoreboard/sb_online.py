@@ -30,9 +30,12 @@ def display_send(mesg, timeout=1):
             display.send(mesg)
             if display.poll(timeout):
                 ack = display.recv()
+                if ack != 'ack': api.logger.error(f'display_send received {ack} instead of ack for mesg {mesg}')
             else:
+                api.logger.error(f'display_send timeout waiting for ack on mesg {mesg}')
                 raise EOFError
-        except:
+        except Exception as e:
+            api.logger.error(f'display_send {e} exception on mesg {mesg}')
             display.close()
             display = Client(('localhost', 6000), authkey=b'vbscores')
 
@@ -144,10 +147,7 @@ def json2match(js, match):
     match.server(js['games'][-1]['server_number'])
     match.game_id = js['games'][-1]['id']
     match.match_id = js['id']
-    try:
-        match.referee(js['referee']['name'])
-    except:
-        match.referee('')
+    match.referee(js['ref_name'])
 
 
 
@@ -168,12 +168,12 @@ def match_list():
                     try:
                         names.append(f'{js_match["name"]}\t[{datetime.strptime(js_match["scheduled_time"], "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%H:%M")}]')
                         ids.append(js_match["id"])
-                        ref = js_match['referee']['name'] if 'referee' in js_match else 'TBD'
+                        ref = 'TBD' if js_match['ref_name'] == '' else js_match['ref_name']
                         teams.append([js_match['team1_name'],js_match['team2_name'],ref])
                     except:
                         names.append(f'{js_match["name"]}\t')
                         ids.append(js_match["id"])
-                        ref = js_match['referee']['name'] if 'referee' in js_match else 'TBD'
+                        ref = 'TBD' if js_match['ref_name'] == '' else js_match['ref_name']
                         teams.append([js_match['team1_name'],js_match['team2_name'],ref])
                 if js_match['state'] == 'in_progress':
                     api.logger.debug(f'check_status_of_matches: match {js_match["id"]} in progress')

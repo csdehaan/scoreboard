@@ -31,7 +31,7 @@ def software_update(force):
         urllib.request.urlretrieve(sw['download_url'], "/tmp/sw_update.tgz")
 
         # verify checksum
-        if str(sw['md5_sum']) != '':
+        if str(sw['md5_hash']) != '':
             with open("/tmp/sw_update.tgz", "rb") as f:
                 digest = hashlib.md5(f.read()).digest()
                 if base64.b64encode(digest).decode() == sw['md5_hash']:

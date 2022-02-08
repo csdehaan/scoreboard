@@ -147,7 +147,6 @@ def json2match(js, match):
     match.server(js['games'][-1]['server_number'])
     match.game_id = js['games'][-1]['id']
     match.match_id = js['id']
-    match.referee(js['ref_name'])
 
 
 

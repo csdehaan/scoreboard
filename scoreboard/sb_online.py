@@ -1,16 +1,20 @@
 
 from time import sleep
-from datetime import datetime, timedelta
+from datetime import datetime
 from multiprocessing.connection import Client
+import json
+import threading
+import subprocess
+import socket
+import traceback
 
 from scoreboard import Version, Match, Config
 from scoreboard.controller import Controller
 from scoreboard.api import Api
 
-import json
-import threading
-import subprocess
-import socket
+
+class AckTimeout(Exception):
+    pass
 
 countdown = 0
 display = None
@@ -32,10 +36,9 @@ def display_send(mesg, timeout=1):
                 ack = display.recv()
                 if ack != 'ack': api.logger.error(f'display_send received {ack} instead of ack for mesg {mesg}')
             else:
-                api.logger.error(f'display_send timeout waiting for ack on mesg {mesg}')
-                raise EOFError
+                raise AckTimeout
         except Exception as e:
-            api.logger.error(f'display_send {e} exception on mesg {mesg}')
+            api.logger.error(f'display_send {traceback.format_exc()} exception on mesg {mesg}')
             display.close()
             display = Client(('localhost', 6000), authkey=b'vbscores')
 
@@ -46,17 +49,20 @@ def periodic_update():
     global controller
 
     threading.Timer(10, periodic_update).start()
-    if countdown > 0: countdown -= 10
-    if controller.status() != 'scoring':
-        matches = match_list()
-        if matches:
-            if len(matches['names']) > 0:
-                api.logger.debug(f'set_status_selecting')
-                controller.set_status_selecting(matches)
-                display_send(['next_match', matches['teams'][0], countdown])
-            else:
-                controller.set_status_no_matches()
-                display_send(['clock'])
+    try:
+        if countdown > 0: countdown -= 10
+        if controller.status() != 'scoring':
+            matches = match_list()
+            if matches:
+                if len(matches['names']) > 0:
+                    api.logger.debug(f'set_status_selecting')
+                    controller.set_status_selecting(matches)
+                    display_send(['next_match', matches['teams'][0], countdown])
+                else:
+                    controller.set_status_no_matches()
+                    display_send(['clock'])
+    except Exception as e:
+        api.logger.error(f'periodic_update exception: {traceback.format_exc()}')
 
 
 def side_switch_clear():
@@ -79,7 +85,7 @@ def update_score():
         controller.set_score(match.team1_score(), match.team2_score(), match.server())
 
     except Exception as e:
-        api.logger.error(f'update_score exception: {e}')
+        api.logger.error(f'update_score exception: {traceback.format_exc()}')
 
 
 def next_match_in(wait_time):
@@ -120,7 +126,7 @@ def rx_score_update(message):
             next_match_in(config.scoreboard.getint('end_match_delay', 60))
 
     except Exception as e:
-        api.logger.error(f'rx_score_update exception: {e}')
+        api.logger.error(f'rx_score_update exception: {traceback.format_exc()}')
 
 
 def rx_config_update(message):
@@ -133,7 +139,7 @@ def rx_config_update(message):
 
 
     except Exception as e:
-        api.logger.error(f'rx_config_update exception: {e}')
+        api.logger.error(f'rx_config_update exception: {traceback.format_exc()}')
 
 
 def json2match(js, match):
@@ -186,7 +192,7 @@ def match_list():
                 return {'names': names, 'ids': ids, 'teams': teams}
 
     except Exception as e:
-        api.logger.error(f'check_status_of_matches exception: {e}')
+        api.logger.error(f'check_status_of_matches exception: {traceback.format_exc()}')
 
     return {'names': [], 'ids': [], 'teams': []}
 

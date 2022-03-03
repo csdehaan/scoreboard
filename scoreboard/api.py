@@ -2,6 +2,7 @@
 
 import urllib.request
 import json
+import logging
 from actioncable.connection import Connection
 from actioncable.subscription import Subscription
 from scoreboard import logger
@@ -15,6 +16,7 @@ class Api:
     def __init__(self, api_key, log_level):
         self.api_key = api_key
         self.actioncable_logger = logger.getLogger('ActionCable Connection', int(log_level), api_key)
+        self.actioncable_logger.addHandler(logging.FileHandler('/tmp/actioncable.connection.log'))
         self.score_subscription = None
         self.config_subscription = None
         self.connection = Connection(url=f'{WS}://{SERVER}/cable')

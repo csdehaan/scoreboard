@@ -1,10 +1,10 @@
 
 from time import sleep
 from datetime import datetime
-from multiprocessing.connection import Client
 
 from scoreboard import Version, Config, Match
 from scoreboard.api import Api
+from scoreboard.display_connection import Display
 
 import json
 import threading
@@ -174,7 +174,7 @@ def sb_qt(config_file):
         config.scoreboard["court"] = court
         config.save()
 
-    display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
+    display = Display('localhost', config.display.getint("port", 6000))
 
     match = Match()
 

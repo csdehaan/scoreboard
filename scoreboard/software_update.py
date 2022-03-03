@@ -16,12 +16,10 @@ def software_update(force):
     sw = api.scoreboard_software()
 
     update = False
-    if force:
-        update = True
-
-    if Version.major < sw['major_version']: update = True
-    if Version.major == sw['major_version'] and Version.minor < sw['minor_version']: update = True
-    if Version.major == sw['major_version'] and Version.minor == sw['minor_version'] and Version.debug < sw['debug_version']: update = True
+    if force: update = True
+    if Version.major != sw['major_version']: update = True
+    if Version.minor != sw['minor_version']: update = True
+    if Version.debug != sw['debug_version']: update = True
 
     if update:
         api.logger.info(f'Updating Scoreboard Software from {Version.str()} to {sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}')
@@ -38,6 +36,7 @@ def software_update(force):
                     api.logger.info("Verified checksum")
                 else:
                     api.logger.error(f'Failed to verify checksum ({base64.b64encode(digest).decode()})')
+                    return
 
         api.logger.debug("Mounting Boot Drive")
         os.system("mkdir /media/boot")

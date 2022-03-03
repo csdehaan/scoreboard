@@ -238,32 +238,35 @@ def listen(disp, port):
         conn = listener.accept()
 
         try:
-            while True:
-                msg = conn.recv()
-                if msg[0] == 'clock':
-                    display.update_clock()
-                if msg[0] == 'match':
-                    display.update_match(msg[1])
-                if msg[0] == 'next_match':
-                    display.update_next_match(msg[1], msg[2])
-                if msg[0] == 'court':
-                    display.court = msg[1]
-                if msg[0] == 'logo':
-                    display.load_logo(msg[1])
-                if msg[0] == 'mesg':
-                    display.show_message(msg[1:4])
-                if msg[0] == 'close':
-                    conn.close()
-                    break
-                if msg[0] == 'shutdown':
-                    print('Shutting down display listener')
-                    conn.close()
-                    running = False
-                    break
+            msg = conn.recv()
+            if msg[0] == 'clock':
+                display.update_clock()
+                conn.send('ack')
+            if msg[0] == 'match':
+                display.update_match(msg[1])
+                conn.send('ack')
+            if msg[0] == 'next_match':
+                display.update_next_match(msg[1], msg[2])
+                conn.send('ack')
+            if msg[0] == 'court':
+                display.court = msg[1]
+                conn.send('ack')
+            if msg[0] == 'logo':
+                display.load_logo(msg[1])
+                conn.send('ack')
+            if msg[0] == 'mesg':
+                display.show_message(msg[1:4])
+                conn.send('ack')
+            if msg[0] == 'shutdown':
+                print('Shutting down display listener')
+                running = False
         except Exception as e:
-            print(e)
+            print(f'QT Display Exception: [{type(e).__name__}] - {e}')
+        finally:
+            conn.close()
 
     listener.close()
+    display.win.close()
 
 
 def qt_display(config_file):
@@ -277,3 +280,7 @@ def qt_display(config_file):
 
     display.win.show()
     display.exec_()
+
+    print('Qt Display closed. Waiting for listen thread to exit.')
+    listen_thread.join()
+    print('Thread joined')

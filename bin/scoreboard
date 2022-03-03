@@ -11,7 +11,7 @@ else:
 from time import sleep
 import subprocess
 from scoreboard import Config
-from multiprocessing.connection import Client
+from scoreboard.display_connection import Display
 import signal
 
 process = None
@@ -35,6 +35,7 @@ def sig_handler(signum, frame):
 
     running = False
     if process:
+        display.send(['shutdown'])
         process.kill()
         process = None
 
@@ -53,6 +54,7 @@ else:
     config = Config()
 
 config.read()
+display = Display('localhost', config.display.getint("port", 6000))
 
 
 # start up the scoreboard in the correct mode
@@ -60,23 +62,16 @@ while running:
     try:
 
         if qt:
-            display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
-            display.send(['mesg', 'Connecting ...'])
-            display.send(['close'])
+            display.send(['mesg', 'Connecting ...'], 1, 8)
             print('Starting QT Mode')
 
             # start the app
             process = subprocess.Popen(["sb_qt",configfile])
             process.wait()
-            display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
-            display.send(['shutdown'])
-            display_process.kill()
             print('QT Mode Exited')
 
         elif GPIO.input(15) == 0:
-            display = Client(('localhost', config.display.getint("port", 6000)), authkey=b'vbscores')
-            display.send(['mesg', 'Connecting ...'])
-            display.send(['close'])
+            display.send(['mesg', 'Connecting ...'], 1, 5)
             print('Starting Online Mode')
 
             # online mode

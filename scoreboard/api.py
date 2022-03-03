@@ -14,6 +14,7 @@ class Api:
 
     def __init__(self, api_key, log_level):
         self.api_key = api_key
+        self.actioncable_logger = logger.getLogger('ActionCable Connection', int(log_level), api_key)
         self.score_subscription = None
         self.config_subscription = None
         self.connection = Connection(url=f'{WS}://{SERVER}/cable')

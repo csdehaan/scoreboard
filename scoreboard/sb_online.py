@@ -1,7 +1,6 @@
 
 from time import sleep
 from datetime import datetime
-from multiprocessing.connection import Client
 import json
 import threading
 import subprocess
@@ -11,36 +10,19 @@ import traceback
 from scoreboard import Version, Match, Config
 from scoreboard.controller import Controller
 from scoreboard.api import Api
+from scoreboard.display_connection import Display
 
 
 class AckTimeout(Exception):
     pass
 
 countdown = 0
-display = None
+display = Display('localhost', 6000)
 config = None
 api = None
 controller = None
 match = None
 side_switch = False
-
-
-def display_send(mesg, timeout=1):
-    global display
-
-    ack = None
-    while ack != 'ack':
-        try:
-            display.send(mesg)
-            if display.poll(timeout):
-                ack = display.recv()
-                if ack != 'ack': api.logger.error(f'display_send received {ack} instead of ack for mesg {mesg}')
-            else:
-                raise AckTimeout
-        except Exception as e:
-            api.logger.error(f'display_send {traceback.format_exc()} exception on mesg {mesg}')
-            display.close()
-            display = Client(('localhost', 6000), authkey=b'vbscores')
 
 
 def periodic_update():
@@ -57,10 +39,10 @@ def periodic_update():
                 if len(matches['names']) > 0:
                     api.logger.debug(f'set_status_selecting')
                     controller.set_status_selecting(matches)
-                    display_send(['next_match', matches['teams'][0], countdown])
+                    display.send(['next_match', matches['teams'][0], countdown])
                 else:
                     controller.set_status_no_matches()
-                    display_send(['clock'])
+                    display.send(['clock'])
     except Exception as e:
         api.logger.error(f'periodic_update exception: {traceback.format_exc()}')
 
@@ -79,7 +61,7 @@ def update_score():
 
     try:
         api.logger.debug(f'update_score: match={match.info}')
-        if side_switch == False: display_send(['match', match])
+        if side_switch == False: display.send(['match', match])
         controller.set_t1_name(match.team1())
         controller.set_t2_name(match.team2())
         controller.set_score(match.team1_score(), match.team2_score(), match.server())
@@ -106,6 +88,7 @@ def rx_score_update(message):
     global match
     global config
     global side_switch
+    global display
 
     api.logger.debug(f'rx_score_update: message={message}')
 
@@ -115,7 +98,7 @@ def rx_score_update(message):
         if m['state'] == 'in_progress':
             controller.set_status_scoring()
             if m['games'][-1]['switch_sides?']:
-                display_send(['mesg','SWITCH','SIDES'])
+                display.send(['mesg','SWITCH','SIDES'])
                 side_switch = True
                 threading.Timer(5, side_switch_clear).start()
             update_score()
@@ -287,15 +270,9 @@ def sb_online():
         config.save()
         restart_display = True
 
-    while display == None:
-        try:
-            display = Client(('localhost', 6000), authkey=b'vbscores')
-            if restart_display:
-                display.send(['shutdown'])
-                sleep(1)
-                display = Client(('localhost', 6000), authkey=b'vbscores')
-        except socket.error:
-            sleep(0.25)
+    if restart_display:
+        display.send(['shutdown'])
+        sleep(1)
 
     api.logger.debug('Enabling bluetooth')
     controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)

@@ -1,30 +1,13 @@
 
 from scoreboard import Config, Match
 from scoreboard.controller import Controller
+from scoreboard.display_connection import Display
 from time import sleep
-
 import threading
-from multiprocessing.connection import Client
 
-display = None
+display = Display('localhost', 6000)
 controller = None
 match = None
-
-
-def display_send(mesg, timeout=1):
-    global display
-
-    ack = None
-    while ack != 'ack':
-        try:
-            display.send(mesg)
-            if display.poll(timeout):
-                ack = display.recv()
-            else:
-                raise EOFError
-        except:
-            display.close()
-            display = Client(('localhost', 6000), authkey=b'vbscores')
 
 
 def update_clock():
@@ -33,7 +16,7 @@ def update_clock():
 
     if controller.status() == 'waiting':
         threading.Timer(10, update_clock).start()
-        display_send(['clock'])
+        display.send(['clock'])
 
 
 def update_score():
@@ -41,7 +24,7 @@ def update_score():
     global controller
     global match
 
-    display_send(['match', match])
+    display.send(['match', match])
     controller.set_score(match.team1_score(), match.team2_score(), match.server())
 
 
@@ -82,18 +65,11 @@ def bt_button(value, options):
 
 
 def sb_offline():
-    global display
     global controller
     global match
 
     config = Config()
     config.read()
-
-    while display == None:
-        try:
-            display = Client(('localhost', 6000), authkey=b'vbscores')
-        except:
-            sleep(0.25)
 
     controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)
     match = Match()

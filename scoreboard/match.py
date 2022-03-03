@@ -103,14 +103,14 @@ class Match:
     def team1_add_point(self):
         self.info['team1_score'] += 1
         if self.info['server'] in range(21,30):
-            self.serve_order.rotate()
+            self.serve_order.rotate(-1)
             self.info['server'] = self.serve_order[0]
 
 
     def team2_add_point(self):
         self.info['team2_score'] += 1
         if self.info['server'] in range(11,20):
-            self.serve_order.rotate()
+            self.serve_order.rotate(-1)
             self.info['server'] = self.serve_order[0]
 
 

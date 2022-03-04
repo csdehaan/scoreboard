@@ -13,13 +13,13 @@ WS = "wss"
 
 class Api:
 
-    def __init__(self, api_key, log_level):
+    def __init__(self, api_key, log_level, actioncable_error=None):
         self.api_key = api_key
         self.actioncable_logger = logger.getLogger('ActionCable Connection', int(log_level), api_key)
         self.actioncable_logger.addHandler(logging.FileHandler('/tmp/actioncable.connection.log'))
         self.score_subscription = None
         self.config_subscription = None
-        self.connection = Connection(url=f'{WS}://{SERVER}/cable')
+        self.connection = Connection(url=f'{WS}://{SERVER}/cable', on_error=actioncable_error)
         self.connection.connect()
         self.logger = logger.getLogger('scoreboard', int(log_level), api_key)
 

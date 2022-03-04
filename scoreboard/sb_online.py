@@ -25,6 +25,11 @@ match = None
 side_switch = False
 
 
+def ping_timeout(ws_app, error):
+    global display
+    display.send(['mesg', 'Connecting ...'])
+
+
 def periodic_update():
     global countdown
     global display
@@ -250,7 +255,7 @@ def sb_online():
     config = Config()
     config.read()
 
-    api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 20))
+    api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 20), ping_timeout)
     api.logger.info(f'Scoreboard {config.scoreboard["serial"]} Ver {Version.str()} Online')
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

@@ -6,6 +6,7 @@ import threading
 import subprocess
 import socket
 import traceback
+from websocket import WebSocketTimeoutException
 
 from scoreboard import Version, Match, Config
 from scoreboard.controller import Controller
@@ -23,22 +24,33 @@ api = None
 controller = None
 match = None
 side_switch = False
+disconnected = False
 
 
 def ping_timeout(ws_app, error):
     global display
-    display.send(['mesg', 'Connecting ...'])
+    global api
+    global disconnected
+
+    try:
+        api.logger.error(f'ActionCable error : {error}')
+    except:
+        pass
+    if isinstance(error, WebSocketTimeoutException):
+        display.send(['mesg', 'Connecting ...'])
+        disconnected = True
 
 
 def periodic_update():
     global countdown
     global display
     global controller
+    global disconnected
 
     threading.Timer(10, periodic_update).start()
     try:
         if countdown > 0: countdown -= 10
-        if controller.status() != 'scoring':
+        if disconnected or controller.status() != 'scoring':
             matches = match_list()
             if matches:
                 if len(matches['names']) > 0:
@@ -148,10 +160,14 @@ def match_list():
     global api
     global controller
     global match
+    global disconnected
 
     api.logger.debug(f'match_list')
     try:
         matches = api.matches()
+        if disconnected:
+            api.connection.connect()
+            disconnected = False
         if len(matches) > 0:
             names = []
             ids = []

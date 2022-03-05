@@ -29,13 +29,8 @@ disconnected = False
 
 def ping_timeout(ws_app, error):
     global display
-    global api
     global disconnected
 
-    try:
-        api.logger.error(f'ActionCable error : {error}')
-    except:
-        pass
     if isinstance(error, WebSocketTimeoutException):
         display.send(['mesg', 'Connecting ...'])
         disconnected = True
@@ -166,6 +161,7 @@ def match_list():
     try:
         matches = api.matches()
         if disconnected:
+            if api.connection.connected: api.connection.disconnect()
             api.connection.connect()
             disconnected = False
         if len(matches) > 0:

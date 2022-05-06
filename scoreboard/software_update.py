@@ -6,6 +6,7 @@ import base64
 
 from scoreboard import Config, Version
 from scoreboard.api import Api
+from scoreboard.display_connection import Display
 
 
 def software_update(force):
@@ -17,11 +18,15 @@ def software_update(force):
 
     update = False
     if force: update = True
-    if Version.major != sw['major_version']: update = True
-    if Version.minor != sw['minor_version']: update = True
-    if Version.debug != sw['debug_version']: update = True
+    if sw['major_version'] != 0:
+        if Version.major != sw['major_version']: update = True
+        if Version.minor != sw['minor_version']: update = True
+        if Version.debug != sw['debug_version']: update = True
 
     if update:
+        display = Display('localhost', config.display.getint("port", 6000))
+        display.send(['mesg', 'Updating SW', f'{sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}', '', 'DO NOT TURN OFF'], 1, 8)
+
         api.logger.info(f'Updating Scoreboard Software from {Version.str()} to {sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}')
         print("Running software update")
 

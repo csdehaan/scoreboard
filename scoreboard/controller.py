@@ -126,3 +126,6 @@ class Controller(peripheral.Peripheral):
     def set_status_no_matches(self):
         self.set_status(6)
 
+
+    def send_config(self, config_json):
+        self.set_status(20, config_json.encode())

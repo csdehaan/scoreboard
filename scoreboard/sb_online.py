@@ -18,7 +18,7 @@ class AckTimeout(Exception):
     pass
 
 countdown = 0
-display = Display('localhost', 6000)
+display = None
 config = None
 api = None
 controller = None
@@ -125,12 +125,22 @@ def rx_score_update(message):
 
 
 def rx_config_update(message):
+    global display
+
     api.logger.info(f'rx_config_update: message={message}')
 
     try:
         m = json.loads(message)
-        rc = subprocess.run(m['cmd'].split(' '), capture_output=True)
-        api.logger.info(rc)
+        cmd = m.get('cmd')
+        if cmd:
+            rc = subprocess.run(cmd.split(' '), capture_output=True)
+            api.logger.info(rc)
+        cmd = m.get('start_timeout')
+        if cmd:
+            display.send(['mesg', cmd, 'TIMEOUT'])
+        cmd = m.get('end_timeout')
+        if cmd:
+            match_list()
 
 
     except Exception as e:
@@ -202,15 +212,19 @@ def log_cpu_temperature():
     global api
 
     threading.Timer(300, log_cpu_temperature).start()
-    with open("/sys/class/thermal/thermal_zone0/temp", "r") as sensor:
-        temperature = int(sensor.readline()) / 1000.0
-        api.logger.info(f'CPU Temperature = {temperature}')
+    try:
+        with open("/sys/class/thermal/thermal_zone0/temp", "r") as sensor:
+            temperature = int(sensor.readline()) / 1000.0
+            api.logger.info(f'CPU Temperature = {temperature}')
+    except:
+        pass
 
 
 def bt_button(value, options):
     global api
     global controller
     global match
+    global config
 
     api.logger.debug(f'bt_button: value={value}')
     if value[0] == 49:
@@ -251,10 +265,20 @@ def bt_button(value, options):
         else:
             api.logger.debug('cancel set serving order')
         controller.set_status_scoring()
+    if value[0] == 97:
+        controller.send_config(config.json())
+    if value[0] == 98:
+        try:
+            value.pop(0)
+            config_setting = json.loads(bytes(value).decode('utf8'))
+            config.config[config_setting[0]][config_setting[1]] = config_setting[2]
+            config.save()
+        except:
+            api.logger.error(f'failed to make config change from: {bytes(value).decode("utf8")}')
 
 
 
-def sb_online():
+def sb_online(configfile=None):
     global api
     global controller
     global match
@@ -264,8 +288,10 @@ def sb_online():
 
     restart_display = False
 
-    config = Config()
+    config = Config(configfile)
     config.read()
+
+    display = Display('localhost', config.display.getint("port", 6000))
 
     api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 20), ping_timeout)
     api.logger.info(f'Scoreboard {config.scoreboard["serial"]} Ver {Version.str()} Online')
@@ -276,7 +302,7 @@ def sb_online():
 
     sb = api.scoreboard()
     logo_img = sb["organization"]["abbrev"]
-    if logo_img != config.display["logo"]:
+    if logo_img != config.display.get("logo", logo_img):
         config.display["logo"] = logo_img
         config.save()
         restart_display = True
@@ -306,4 +332,3 @@ def sb_online():
     log_cpu_temperature()
 
     controller.publish()
-

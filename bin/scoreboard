@@ -66,7 +66,7 @@ while running:
             print('Starting QT Mode')
 
             # start the app
-            process = subprocess.Popen(["sb_qt",configfile])
+            process = subprocess.Popen(["sb_online", configfile])
             process.wait()
             print('QT Mode Exited')
 
@@ -84,6 +84,9 @@ while running:
                 subprocess.run(["cat", "/etc/wpa_supplicant.base"], stdout=outfile)
             subprocess.run(["ifup", "wlan0"])
             subprocess.run(["wpa_cli", "reconfigure"])
+
+            # check for software updates
+            subprocess.run(["software_update"])
 
             # start the app
             process = subprocess.Popen(["sb_online"])

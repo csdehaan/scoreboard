@@ -1,6 +1,7 @@
 
 from configparser import ConfigParser
 import subprocess
+from json import dumps
 
 
 class Config:
@@ -38,3 +39,10 @@ class Config:
         with open(self.file, "w") as configfile:
             self.config.write(configfile)
 
+
+    def json(self):
+        d = {}
+        d['scoreboard'] = dict(self.scoreboard)
+        d['display'] = dict(self.display)
+        d['wifi'] = dict(self.wifi)
+        return dumps(d)

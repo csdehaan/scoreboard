@@ -1,6 +1,0 @@
-#!/usr/bin/env python3
-
-import sys
-from scoreboard.sb_qt import sb_qt
-
-sb_qt(sys.argv[1])

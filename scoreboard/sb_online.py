@@ -137,7 +137,7 @@ def rx_config_update(message):
             api.logger.info(rc)
         cmd = m.get('start_timeout')
         if cmd:
-            display.send(['mesg', cmd, 'TIMEOUT'])
+            display.send(['mesg', cmd, '', 'TIMEOUT'])
         cmd = m.get('end_timeout')
         if cmd:
             match_list()

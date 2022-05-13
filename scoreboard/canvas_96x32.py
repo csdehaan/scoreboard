@@ -150,11 +150,11 @@ class Canvas:
             graphics.DrawText(self.canvas, self.mesg_font, x, 30, self.mesg_color, msg[2].center(l))
         if len(msg) > 3:
             [x,l] = [1,16] if (len(msg[0]) % 2 == 0) else [3,15]
-            graphics.DrawText(self.canvas, self.mesg_font, x, 14, self.mesg_color, msg[0].center(l))
+            graphics.DrawText(self.canvas, self.player_name_font, x, 7, self.mesg_color, msg[0].center(l))
             [x,l] = [1,16] if (len(msg[1]) % 2 == 0) else [3,15]
-            graphics.DrawText(self.canvas, self.mesg_font, x, 30, self.mesg_color, msg[1].center(l))
+            graphics.DrawText(self.canvas, self.player_name_font, x, 15, self.mesg_color, msg[1].center(l))
             [x,l] = [1,16] if (len(msg[2]) % 2 == 0) else [3,15]
-            graphics.DrawText(self.canvas, self.mesg_font, x, 46, self.mesg_color, msg[2].center(l))
+            graphics.DrawText(self.canvas, self.player_name_font, x, 23, self.mesg_color, msg[2].center(l))
             [x,l] = [1,16] if (len(msg[3]) % 2 == 0) else [3,15]
-            graphics.DrawText(self.canvas, self.mesg_font, x, 62, self.mesg_color, msg[3].center(l))
+            graphics.DrawText(self.canvas, self.player_name_font, x, 31, self.mesg_color, msg[3].center(l))
         self.canvas = matrix.SwapOnVSync(self.canvas)

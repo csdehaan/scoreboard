@@ -7,6 +7,7 @@ import subprocess
 import socket
 import traceback
 from websocket import WebSocketTimeoutException
+import logging
 
 from scoreboard import Version, Match, Config
 from scoreboard.controller import Controller
@@ -208,14 +209,16 @@ def match_list():
 
 
 
-def log_cpu_temperature():
+def update_status():
     global api
 
-    threading.Timer(300, log_cpu_temperature).start()
+    threading.Timer(30, update_status).start()
     try:
         with open("/sys/class/thermal/thermal_zone0/temp", "r") as sensor:
             temperature = int(sensor.readline()) / 1000.0
-            api.logger.info(f'CPU Temperature = {temperature}')
+            api.scoreboard_status({"cpu_temperature": temperature})
+            if temperature > 58:
+                api.logger.warning(f'CPU Temperature = {temperature}')
     except:
         pass
 
@@ -293,7 +296,7 @@ def sb_online(configfile=None):
 
     display = Display('localhost', config.display.getint("port", 6000))
 
-    api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 20), ping_timeout)
+    api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', logging.WARNING), ping_timeout)
     api.logger.info(f'Scoreboard {config.scoreboard["serial"]} Ver {Version.str()} Online')
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -329,6 +332,6 @@ def sb_online(configfile=None):
     api.subscribe_config_updates(rx_config_update)
 
     periodic_update()
-    log_cpu_temperature()
+    update_status()
 
     controller.publish()

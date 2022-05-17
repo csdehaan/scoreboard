@@ -1,6 +1,6 @@
 
 
-import urllib.request
+from urllib import request, parse
 import json
 import logging
 from actioncable.connection import Connection
@@ -43,61 +43,66 @@ class Api:
 
 
     def scoreboard(self):
-        response = urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/scoreboard.json?api_key='+self.api_key, timeout=5).read().decode()
+        response = request.urlopen(f'{HTTP}://{SERVER}/apiv1/scoreboard.json?api_key='+self.api_key, timeout=5).read().decode()
         return json.loads(response)
 
 
     def scoreboard_software(self):
-        response = urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/scoreboard_software.json?api_key='+self.api_key, timeout=5).read().decode()
+        response = request.urlopen(f'{HTTP}://{SERVER}/apiv1/scoreboard_software.json?api_key='+self.api_key, timeout=5).read().decode()
         return json.loads(response)
 
 
+    def scoreboard_status(self, status):
+        data = parse.urlencode({'status': json.dumps(status)}).encode()
+        request.urlopen(f'{HTTP}://{SERVER}/apiv1/scoreboard_status.json?api_key='+self.api_key, data=data, timeout=5)
+
+
     def matches(self):
-        response = urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/matches.json?api_key='+self.api_key, timeout=5).read().decode()
+        response = request.urlopen(f'{HTTP}://{SERVER}/apiv1/matches.json?api_key='+self.api_key, timeout=5).read().decode()
         return json.loads(response)
 
 
     def start_game(self, match_id):
-        response = urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/matches/'+str(match_id)+'/start_game.json?api_key='+self.api_key, timeout=5).read().decode()
+        response = request.urlopen(f'{HTTP}://{SERVER}/apiv1/matches/'+str(match_id)+'/start_game.json?api_key='+self.api_key, timeout=5).read().decode()
         return json.loads(response)
 
 
     def end_match(self, match_id):
-        urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/matches/'+str(match_id)+'/end_match.json?api_key='+self.api_key, timeout=5)
+        request.urlopen(f'{HTTP}://{SERVER}/apiv1/matches/'+str(match_id)+'/end_match.json?api_key='+self.api_key, timeout=5)
 
 
     def team1_plus(self, game_id):
         if game_id:
-            urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/team1_score_plus.json?api_key='+self.api_key, timeout=5)
+            request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/team1_score_plus.json?api_key='+self.api_key, timeout=5)
 
 
 
     def team1_minus(self, game_id):
         if game_id:
-            urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/team1_score_minus.json?api_key='+self.api_key, timeout=5)
+            request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/team1_score_minus.json?api_key='+self.api_key, timeout=5)
 
 
 
     def team2_plus(self, game_id):
         if game_id:
-            urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/team2_score_plus.json?api_key='+self.api_key, timeout=5)
+            request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/team2_score_plus.json?api_key='+self.api_key, timeout=5)
 
 
 
     def team2_minus(self, game_id):
         if game_id:
-            urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/team2_score_minus.json?api_key='+self.api_key, timeout=5)
+            request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/team2_score_minus.json?api_key='+self.api_key, timeout=5)
 
 
     def end_game(self, game_id):
-        urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/end_game.json?api_key='+self.api_key, timeout=5)
+        request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/end_game.json?api_key='+self.api_key, timeout=5)
 
 
     def get_serving_order(self, game_id):
-        response = urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/get_serving_order.json?api_key='+self.api_key, timeout=5).read().decode()
+        response = request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/get_serving_order.json?api_key='+self.api_key, timeout=5).read().decode()
         return json.loads(response)
 
 
     def set_serving_order(self, game_id, serve_order):
-        urllib.request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/set_serving_order.json?api_key='+self.api_key+'&serving_order='+serve_order, timeout=5)
+        request.urlopen(f'{HTTP}://{SERVER}/apiv1/games/'+str(game_id)+'/set_serving_order.json?api_key='+self.api_key+'&serving_order='+serve_order, timeout=5)
 

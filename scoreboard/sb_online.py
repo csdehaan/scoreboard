@@ -13,6 +13,7 @@ from scoreboard import Version, Match, Config
 from scoreboard.controller import Controller
 from scoreboard.api import Api
 from scoreboard.display_connection import Display
+from scoreboard.renogy import Renogy
 
 
 class AckTimeout(Exception):
@@ -26,6 +27,7 @@ controller = None
 match = None
 side_switch = False
 disconnected = False
+renogy = None
 
 
 def ping_timeout(ws_app, error):
@@ -211,14 +213,23 @@ def match_list():
 
 def update_status():
     global api
+    global renogy
 
     threading.Timer(30, update_status).start()
     try:
+        status = {}
         with open("/sys/class/thermal/thermal_zone0/temp", "r") as sensor:
             temperature = int(sensor.readline()) / 1000.0
-            api.scoreboard_status({"cpu_temperature": temperature})
+            status["cpu_temperature"] = temperature
             if temperature > 58:
                 api.logger.warning(f'CPU Temperature = {temperature}')
+        if renogy:
+            renogy.read()
+            status["batt_charge"] = renogy.batt_soc
+            status["load_watts"] = renogy.load_watts
+            status["pv_watts"] = renogy.pv_watts
+
+        api.scoreboard_status(status)
     except:
         pass
 
@@ -288,6 +299,7 @@ def sb_online(configfile=None):
     global countdown
     global config
     global display
+    global renogy
 
     restart_display = False
 
@@ -330,6 +342,10 @@ def sb_online(configfile=None):
 
     api.logger.debug('Subscribing to config updates')
     api.subscribe_config_updates(rx_config_update)
+
+    renogy_addr = config.scoreboard.getint("renogy_addr")
+    if renogy_addr:
+        renogy = Renogy("/dev/ttyS0", 9600, renogy_addr)
 
     periodic_update()
     update_status()

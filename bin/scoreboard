@@ -17,13 +17,15 @@ import signal
 process = None
 mode = None
 running = True
+mode_pin = 15
 
 
 def switch_toggled(channel):
     global process
+    global mode_pin
 
     sleep(0.25)
-    if process and ((GPIO.input(15) == 0 and mode == 'offline') or (GPIO.input(15) == 1 and mode == 'online')):
+    if process and ((GPIO.input(mode_pin) == 0 and mode == 'offline') or (GPIO.input(mode_pin) == 1 and mode == 'online')):
         print('Killing old process')
         process.kill()
         process = None
@@ -45,15 +47,19 @@ if qt:
     signal.signal(signal.SIGINT, sig_handler)
     display_process = subprocess.Popen(["qt_display",configfile])
     config = Config(configfile)
+    config.read()
 else:
+    config = Config()
+    config.read()
+    mode_pin = config.scoreboard.getint("mode_pin", 15)
+
     # setup the online / offline switch
     GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
-    GPIO.setup(15, GPIO.IN, GPIO.PUD_UP)
-    GPIO.add_event_detect(15, GPIO.BOTH, callback=switch_toggled, bouncetime=500)
-    config = Config()
+    GPIO.setup(mode_pin, GPIO.IN, GPIO.PUD_UP)
+    GPIO.add_event_detect(mode_pin, GPIO.BOTH, callback=switch_toggled, bouncetime=500)
 
-config.read()
+
 display = Display('localhost', config.display.getint("port", 6000))
 
 
@@ -70,7 +76,7 @@ while running:
             process.wait()
             print('QT Mode Exited')
 
-        elif GPIO.input(15) == 0:
+        elif GPIO.input(mode_pin) == 0:
             display.send(['mesg', 'Connecting ...'], 1, 20)
             print('Starting Online Mode')
 

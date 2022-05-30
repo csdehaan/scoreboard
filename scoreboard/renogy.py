@@ -1,6 +1,6 @@
 
 
-import minimalmodbus
+from scoreboard import minimalmodbus
 import serial
 
 class Renogy:

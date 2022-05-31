@@ -343,9 +343,11 @@ def sb_online(configfile=None):
     api.logger.debug('Subscribing to config updates')
     api.subscribe_config_updates(rx_config_update)
 
-    renogy_addr = config.scoreboard.getint("renogy_addr")
-    if renogy_addr:
-        renogy = Renogy("/dev/ttyS0", 9600, renogy_addr)
+    renogy_port = config.scoreboard.get("renogy_port")
+    renogy_baud = config.scoreboard.getint("renogy_baud", 9600)
+    renogy_addr = config.scoreboard.getint("renogy_addr", 255)
+    if renogy_port:
+        renogy = Renogy(renogy_port, renogy_baud, renogy_addr)
 
     periodic_update()
     update_status()

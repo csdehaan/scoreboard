@@ -230,6 +230,16 @@ class Display(Qt.QApplication):
         self.mesg_widget.show()
 
 
+    def show_timer(self, msg, count):
+        msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
+        self.mesg1.setText(msg)
+        self.mesg2.setText(msg2)
+        self.mesg3.setText("")
+        self.mesg4.setText("")
+        self.score_widget.hide()
+        self.mesg_widget.show()
+
+
 def listen(disp, port):
     display = disp
     listener = Listener(('localhost', port), authkey=b'vbscores')

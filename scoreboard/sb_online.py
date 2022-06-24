@@ -1,6 +1,7 @@
 
 from time import sleep
 from datetime import datetime
+from datetime import timedelta
 import json
 import threading
 import subprocess
@@ -25,9 +26,12 @@ config = None
 api = None
 controller = None
 match = None
-side_switch = False
+switching_sides = False
 disconnected = False
 renogy = None
+timeout = None
+next_match = None
+timer = None
 
 
 def ping_timeout(ws_app, error):
@@ -39,44 +43,113 @@ def ping_timeout(ws_app, error):
         disconnected = True
 
 
-def periodic_update():
+def periodic_task(interval, times = 1000000000, cleanup = None):
+    def outer_wrap(function):
+        def wrap(*args, **kwargs):
+            stop = threading.Event()
+            def inner_wrap():
+                i = 0
+                delta = timedelta(seconds=interval)
+                start_time = datetime.now()
+                while i < times and not stop.isSet():
+                    function(i, *args, **kwargs)
+                    i += 1
+                    stop.wait((start_time + (delta * i) - datetime.now()).total_seconds())
+
+                if cleanup:
+                    cleanup()
+
+            t = threading.Timer(0, inner_wrap)
+            t.daemon = True
+            t.start()
+            return stop
+        return wrap
+    return outer_wrap
+
+
+@periodic_task(1)
+def update_timer(i, msg, seconds):
+    global display
+    global timer
+
+    display.send(['timer', msg, seconds-i])
+    if seconds-1 <= 0:
+        timer.set()
+        timer = None
+
+
+
+@periodic_task(1)
+def update_next_match(i):
     global countdown
     global display
     global controller
     global disconnected
+    global next_match
+    global timer
 
-    threading.Timer(10, periodic_update).start()
+    if timer: return
+
     try:
-        if countdown > 0: countdown -= 10
-        if disconnected or controller.status() != 'scoring':
+        if (i % 10 == 0) and (disconnected or controller.status() != 'scoring'):
             matches = match_list()
             if matches:
                 if len(matches['names']) > 0:
                     api.logger.debug(f'set_status_selecting')
                     controller.set_status_selecting(matches)
-                    display.send(['next_match', matches['teams'][0], countdown])
+                    next_match = matches['teams'][0]
+                    display.send(['next_match', next_match, countdown])
                 else:
                     controller.set_status_no_matches()
                     display.send(['clock'])
+
+        if countdown > 0 and (disconnected or controller.status() != 'scoring'):
+            countdown -= 1
+            display.send(['next_match', next_match, countdown])
+
     except Exception as e:
         api.logger.error(f'periodic_update exception: {traceback.format_exc()}')
 
 
+
+def after_timeout():
+    global timeout
+
+    timeout = None
+    match_list()
+
+
+@periodic_task(1, 60, after_timeout)
+def update_timeout(i, name):
+    global display
+    display.send(['mesg', name, 'TIMEOUT', str(60-i)])
+
+
 def side_switch_clear():
-    global side_switch
-    side_switch = False
+    global switching_sides
+    switching_sides = False
     update_score()
+
+
+
+@periodic_task(10, 1, side_switch_clear)
+def side_switch(i):
+    global display
+    global switching_sides
+
+    switching_sides = True
+    display.send(['mesg','SWITCH','SIDES'])
 
 
 def update_score():
     global display
     global controller
     global match
-    global side_switch
+    global switching_sides
 
     try:
         api.logger.debug(f'update_score: match={match.info}')
-        if side_switch == False: display.send(['match', match])
+        if switching_sides == False: display.send(['match', match])
         controller.set_t1_name(match.team1())
         controller.set_t2_name(match.team2())
         controller.set_score(match.team1_score(), match.team2_score(), match.server())
@@ -102,7 +175,6 @@ def rx_score_update(message):
     global controller
     global match
     global config
-    global side_switch
     global display
 
     api.logger.debug(f'rx_score_update: message={message}')
@@ -113,9 +185,7 @@ def rx_score_update(message):
         if m['state'] == 'in_progress':
             controller.set_status_scoring()
             if m['games'][-1]['switch_sides?']:
-                display.send(['mesg','SWITCH','SIDES'])
-                side_switch = True
-                threading.Timer(5, side_switch_clear).start()
+                side_switch()
             update_score()
             if m['games'][-1]['game_over?']:
                 controller.set_status_next_game()
@@ -129,6 +199,8 @@ def rx_score_update(message):
 
 def rx_config_update(message):
     global display
+    global timeout
+    global timer
 
     api.logger.info(f'rx_config_update: message={message}')
 
@@ -140,10 +212,14 @@ def rx_config_update(message):
             api.logger.info(rc)
         cmd = m.get('start_timeout')
         if cmd:
-            display.send(['mesg', cmd, '', 'TIMEOUT'])
+            timeout = update_timeout(cmd)
         cmd = m.get('end_timeout')
         if cmd:
-            match_list()
+            if timeout:
+                timeout.set()
+        cmd = m.get('start_timer')
+        if cmd:
+            timer = update_timer(m.get('timer_msg'), cmd)
 
 
     except Exception as e:
@@ -211,24 +287,31 @@ def match_list():
 
 
 
-def update_status():
+@periodic_task(30)
+def update_status(i):
     global api
     global renogy
 
-    threading.Timer(30, update_status).start()
+    status = {}
     try:
-        status = {}
         with open("/sys/class/thermal/thermal_zone0/temp", "r") as sensor:
             temperature = int(sensor.readline()) / 1000.0
             status["cpu_temperature"] = temperature
             if temperature > 58:
                 api.logger.warning(f'CPU Temperature = {temperature}')
+    except:
+        pass
+
+    try:
         if renogy:
             renogy.read()
             status["batt_charge"] = renogy.batt_soc
             status["load_watts"] = renogy.load_watts
             status["pv_watts"] = renogy.pv_watts
+    except:
+        pass
 
+    try:
         api.scoreboard_status(status)
     except:
         pass
@@ -349,7 +432,7 @@ def sb_online(configfile=None):
     if renogy_port:
         renogy = Renogy(renogy_port, renogy_baud, renogy_addr)
 
-    periodic_update()
+    update_next_match()
     update_status()
 
     controller.publish()

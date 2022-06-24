@@ -34,7 +34,7 @@ class Match:
         if name == None:
             return self.info['team1']
         self.info['team1'] = name.strip()
-        self.info['t1_players'] = self.info['team1'].split('/')
+        self.info['t1_players'] = list(map(lambda x: x.strip(), self.info['team1'].split('/')))
         if len(self.info['t1_players']) == len(self.info['t2_players']):
             self.serving_order(sum(list(map(lambda x: [x,x+10], range(11,11+len(self.info['t1_players'])))), []))
         else:
@@ -45,7 +45,7 @@ class Match:
         if name == None:
             return self.info['team2']
         self.info['team2'] = name.strip()
-        self.info['t2_players'] = self.info['team2'].split('/')
+        self.info['t2_players'] = list(map(lambda x: x.strip(), self.info['team2'].split('/')))
         if len(self.info['t1_players']) == len(self.info['t2_players']):
             self.serving_order(sum(list(map(lambda x: [x,x+10], range(11,11+len(self.info['t2_players'])))), []))
         else:

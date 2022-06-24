@@ -61,6 +61,10 @@ class Display:
         self.canvas.draw_message(self.matrix, msg)
 
 
+    def show_timer(self, msg, count):
+        self.canvas.draw_timer(self.matrix, msg, count)
+
+
 
 def rgb_display():
     config = Config()
@@ -83,6 +87,9 @@ def rgb_display():
                 conn.send('ack')
             if msg[0] == 'next_match':
                 display.update_next_match(msg[1], msg[2])
+                conn.send('ack')
+            if msg[0] == 'timer':
+                display.show_timer(msg[1], msg[2])
                 conn.send('ack')
             if msg[0] == 'court':
                 display.court = msg[1]

@@ -158,3 +158,14 @@ class Canvas:
             [x,l] = [1,16] if (len(msg[3]) % 2 == 0) else [3,15]
             graphics.DrawText(self.canvas, self.player_name_font, x, 31, self.mesg_color, msg[3].center(l))
         self.canvas = matrix.SwapOnVSync(self.canvas)
+
+
+    def draw_timer(self, matrix, msg, count):
+        self.canvas.Clear()
+        [x,l] = [1,16] if (len(msg) % 2 == 0) else [3,15]
+        graphics.DrawText(self.canvas, self.mesg_font, x, 14, self.mesg_color, msg.center(l))
+
+        msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
+        [x,l] = [10,10] if (len(msg2) % 2 == 0) else [3,11]
+        graphics.DrawText(self.canvas, self.time_font, x, 24, self.score_color, msg2.center(l))
+        self.canvas = matrix.SwapOnVSync(self.canvas)

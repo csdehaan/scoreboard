@@ -73,7 +73,7 @@ def update_timer(i, msg, seconds):
     global timer
 
     display.send(['timer', msg, seconds-i])
-    if seconds-1 <= 0:
+    if seconds-i <= 0:
         timer.set()
         timer = None
 
@@ -219,7 +219,7 @@ def rx_config_update(message):
                 timeout.set()
         cmd = m.get('start_timer')
         if cmd:
-            timer = update_timer(m.get('timer_msg'), cmd)
+            timer = update_timer(m.get('timer_msg'), int(cmd))
 
 
     except Exception as e:

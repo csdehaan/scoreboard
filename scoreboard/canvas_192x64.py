@@ -176,10 +176,16 @@ class Canvas:
 
     def draw_timer(self, matrix, msg, count):
         self.canvas.Clear()
-        [x,l] = [6,18] if (len(msg) % 2 == 0) else [1,19]
-        graphics.DrawText(self.canvas, self.mesg_font, x, 28, self.mesg_color, msg.center(l))
+        if msg:
+            [x,l] = [6,18] if (len(msg) % 2 == 0) else [1,19]
+            graphics.DrawText(self.canvas, self.mesg_font, x, 28, self.mesg_color, msg.center(l))
 
-        msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
-        [x,l] = [10,12] if (len(msg2) % 2 == 0) else [3,13]
-        graphics.DrawText(self.canvas, self.time_font, x, 48, self.score_color, msg2.center(l))
-        self.canvas = matrix.SwapOnVSync(self.canvas)
+            msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
+            [x,l] = [10,12] if (len(msg2) % 2 == 0) else [3,13]
+            graphics.DrawText(self.canvas, self.time_font, x, 48, self.score_color, msg2.center(l))
+            self.canvas = matrix.SwapOnVSync(self.canvas)
+        else:
+            msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
+            [x,l] = [10,12] if (len(msg2) % 2 == 0) else [3,13]
+            graphics.DrawText(self.canvas, self.time_font, x, 36, self.score_color, msg2.center(l))
+            self.canvas = matrix.SwapOnVSync(self.canvas)

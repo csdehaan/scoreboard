@@ -100,10 +100,12 @@ def update_next_match(i):
                     next_match = matches['teams'][0]
                     display.send(['next_match', next_match, countdown])
                 else:
+                    next_match = None
+                    countdown = 0
                     controller.set_status_no_matches()
                     display.send(['clock'])
 
-        if countdown > 0 and (disconnected or controller.status() != 'scoring'):
+        if next_match and countdown > 0 and (disconnected or controller.status() != 'scoring'):
             countdown -= 1
             display.send(['next_match', next_match, countdown])
 
@@ -159,6 +161,8 @@ def update_score():
 
 
 def next_match_in(wait_time):
+    global next_match
+    next_match = None
     threading.Timer(wait_time, next_match_now).start()
 
 
@@ -219,6 +223,7 @@ def rx_config_update(message):
                 timeout.set()
         cmd = m.get('start_timer')
         if cmd:
+            if timer: timer.set()
             timer = update_timer(m.get('timer_msg'), int(cmd))
 
 

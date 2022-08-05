@@ -45,7 +45,7 @@ def sig_handler(signum, frame):
 if qt:
     signal.signal(signal.SIGTERM, sig_handler)
     signal.signal(signal.SIGINT, sig_handler)
-    display_process = subprocess.Popen(["qt_display",configfile])
+    display_process = subprocess.Popen(["display",configfile])
     config = Config(configfile)
     config.read()
 else:

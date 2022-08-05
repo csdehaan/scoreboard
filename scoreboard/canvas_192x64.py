@@ -1,10 +1,32 @@
 
-from rgbmatrix import graphics
+from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
+from PIL import Image
+from datetime import datetime
 
 class Canvas:
 
-    def __init__(self, canvas):
-        self.canvas = canvas
+    def __init__(self, config):
+        options = RGBMatrixOptions()
+        options.drop_privileges = False
+        options.rows = config.display.getint("rows")
+        options.cols = config.display.getint("cols")
+        options.chain_length = config.display.getint("chain_length", 1)
+        options.parallel = config.display.getint("parallel", 1)
+        options.row_address_type = config.display.getint("row_address_type", 0)
+        options.multiplexing = config.display.getint("multiplexing", 0)
+        options.pwm_bits = config.display.getint("pwm_bits", 11)
+        options.brightness = config.display.getint("brightness", 100)
+        options.pwm_lsb_nanoseconds = config.display.getint("pwm_lsb_nanoseconds", 130)
+        options.led_rgb_sequence = config.display.get("led_rgb_sequence", "RGB")
+        options.gpio_slowdown = config.display.getint("gpio_slowdown", 1)
+        options.limit_refresh_rate_hz = config.display.getint("limit_refresh", 0)
+        self.matrix = RGBMatrix(options = options)
+        self.canvas = self.matrix.CreateFrameCanvas()
+
+        self.rows = 64
+        self.cols = 192
+        self.load_logo(config.display["logo"])
+        self.court = config.scoreboard["court"]
 
         # fonts
         self.court_font = graphics.Font()
@@ -28,6 +50,13 @@ class Canvas:
         self.mesg_color = graphics.Color(255, 191, 0)
 
 
+    def load_logo(self, org):
+        try:
+            self.logo = Image.open(f'/usr/share/scoreboard/{org}64.png').convert('RGB')
+        except:
+            self.logo = Image.open('/usr/share/scoreboard/vbs64.png').convert('RGB')
+
+
     def draw_player_name(self, name, max_length, x, y, server):
         if name == None: return
         name = name[0:max_length]
@@ -40,22 +69,23 @@ class Canvas:
         graphics.DrawText(self.canvas, self.score_font, x, y, self.score_color, str(score).rjust(2))
 
 
-    def draw_clock(self, matrix, logo, court, time):
+    def update_clock(self):
         self.canvas.Clear()
-        self.canvas.SetImage(logo)
+        self.canvas.SetImage(self.logo)
 
-        court_txt = f'COURT {court}'[0:9]
+        court_txt = f'COURT {self.court}'[0:9]
         courtx = 69 if len(court_txt) % 2 == 0 else 75
         graphics.DrawText(self.canvas, self.court_font, courtx, 25, self.court_color, court_txt.center(9))
 
+        time = datetime.now().strftime("%-I:%M")
         timex = 99 if len(time) % 2 == 0 else 92
         graphics.DrawText(self.canvas, self.time_font, timex, 53, self.time_color, time)
 
-        self.canvas = matrix.SwapOnVSync(self.canvas)
+        self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
 
 
-    def draw_match(self, matrix, match):
+    def update_match(self, match):
         self.canvas.Clear()
         if match.player(1,3):
             self.draw_player_name(match.player(1, 1), 10, 2, 11, match.server() == 11)
@@ -109,10 +139,10 @@ class Canvas:
             graphics.DrawLine(self.canvas, 172, 60, 174, 60, self.server_color)
 
         graphics.DrawLine(self.canvas, 0, 32, 191, 32, self.divide_line_color)
-        self.canvas = matrix.SwapOnVSync(self.canvas)
+        self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
 
-    def draw_next_match(self, matrix, teams, countdown=-1):
+    def update_next_match(self, teams, countdown=-1):
         if int(countdown) > 0:
             next_match = f'NEXT: {int(countdown/60):2}:{(int(countdown)%60):02}'
         else:
@@ -142,10 +172,10 @@ class Canvas:
         self.draw_player_name("VS".center(26), 26, 4, 36, False)
         self.draw_player_name(team2.center(26), 26, team2x, 49, False)
         self.draw_player_name(ref.center(26), 26, refx, 62, False)
-        self.canvas = matrix.SwapOnVSync(self.canvas)
+        self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
 
-    def draw_message(self, matrix, msg):
+    def show_message(self, msg):
         self.canvas.Clear()
         if len(msg) == 1:
             [x,l] = [6,18] if (len(msg[0]) % 2 == 0) else [1,19]
@@ -171,10 +201,10 @@ class Canvas:
             graphics.DrawText(self.canvas, self.mesg_font, x, 46, self.mesg_color, msg[2].center(l))
             [x,l] = [6,18] if (len(msg[3]) % 2 == 0) else [1,19]
             graphics.DrawText(self.canvas, self.mesg_font, x, 62, self.mesg_color, msg[3].center(l))
-        self.canvas = matrix.SwapOnVSync(self.canvas)
+        self.canvas = self.matrix.SwapOnVSync(self.canvas)
 
 
-    def draw_timer(self, matrix, msg, count):
+    def show_timer(self, msg, count):
         self.canvas.Clear()
         if msg:
             [x,l] = [6,18] if (len(msg) % 2 == 0) else [1,19]
@@ -183,9 +213,9 @@ class Canvas:
             msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
             [x,l] = [10,12] if (len(msg2) % 2 == 0) else [3,13]
             graphics.DrawText(self.canvas, self.time_font, x, 48, self.score_color, msg2.center(l))
-            self.canvas = matrix.SwapOnVSync(self.canvas)
+            self.canvas = self.matrix.SwapOnVSync(self.canvas)
         else:
             msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
             [x,l] = [10,12] if (len(msg2) % 2 == 0) else [3,13]
             graphics.DrawText(self.canvas, self.time_font, x, 36, self.score_color, msg2.center(l))
-            self.canvas = matrix.SwapOnVSync(self.canvas)
+            self.canvas = self.matrix.SwapOnVSync(self.canvas)

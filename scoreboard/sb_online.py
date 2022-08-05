@@ -15,6 +15,7 @@ from scoreboard.controller import Controller
 from scoreboard.api import Api
 from scoreboard.display_connection import Display
 from scoreboard.renogy import Renogy
+from scoreboard.workout import Workout
 
 
 class AckTimeout(Exception):
@@ -32,6 +33,7 @@ renogy = None
 timeout = None
 next_match = None
 timer = None
+workout = None
 
 
 def ping_timeout(ws_app, error):
@@ -76,6 +78,16 @@ def update_timer(i, msg, seconds):
     if seconds-i <= 0:
         timer.set()
         timer = None
+
+
+# @periodic_task(1)
+# def update_workout(i, workout):
+#     global display
+
+#     display.send(['timer', msg, seconds-i])
+#     if seconds-i <= 0:
+#         timer.set()
+#         timer = None
 
 
 
@@ -205,6 +217,7 @@ def rx_config_update(message):
     global display
     global timeout
     global timer
+    global workout
 
     api.logger.info(f'rx_config_update: message={message}')
 
@@ -225,6 +238,11 @@ def rx_config_update(message):
         if cmd:
             if timer: timer.set()
             timer = update_timer(m.get('timer_msg'), int(cmd))
+        cmd = m.get('workout')
+        if cmd:
+            if timer: timer.set()
+            workout = Workout(m.get('workout'))
+            workout.start()
 
 
     except Exception as e:

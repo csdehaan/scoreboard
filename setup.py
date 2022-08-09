@@ -21,7 +21,6 @@ setuptools.setup(
         'License :: Other/Proprietary License'
     ],
     packages=setuptools.find_packages(),
-    scripts=['bin/cfg_update','bin/scoreboard','bin/software_update','bin/display','bin/sb_online','bin/sb_offline','bin/qt_display'],
-    install_requires=['ActionCableZwei'],
-    ext_modules = cythonize("scoreboard/*.py", language_level = "3")
+    entry_points={'console_scripts':['cfg_update = scoreboard.bin.cfg_update:main','scoreboard = scoreboard.bin.scoreboard:main','software_update = scoreboard.bin.software_update:main','display = scoreboard.bin.display:main','sb_online = scoreboard.bin.sb_online:main','sb_offline = scoreboard.bin.sb_offline:main']},
+    install_requires=['ActionCableZwei']
 )

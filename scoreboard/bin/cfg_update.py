@@ -3,4 +3,5 @@
 import sys
 from scoreboard.cfg_update import cfg_update
 
-cfg_update(sys.argv)
+def main():
+    cfg_update(sys.argv)

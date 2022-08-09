@@ -48,16 +48,17 @@ class Canvas(Qt.QApplication):
         self.win.setAutoFillBackground( True )
         self.rows = 64
         self.cols = 192
+        self.resource_path = config.display.get("resource_path", "/usr/share/scoreboard")
         self.load_logo(config.display["logo"])
         self.court = config.scoreboard["court"]
         self.canvas = Image.new('RGB', (192,64))
 
         # fonts
-        self.court_font = Font("/usr/share/scoreboard/fonts/BVM-20.bdf")
-        self.time_font = Font("/usr/share/scoreboard/fonts/BVM-25.bdf")
-        self.player_name_font = Font("/usr/share/scoreboard/fonts/BVM-12.bdf")
-        self.score_font = Font("/usr/share/scoreboard/fonts/BVM-25.bdf")
-        self.mesg_font = Font("/usr/share/scoreboard/fonts/BVM-16.bdf")
+        self.court_font = Font(self.resource_path + "/fonts/BVM-20.bdf")
+        self.time_font = Font(self.resource_path + "/fonts/BVM-25.bdf")
+        self.player_name_font = Font(self.resource_path + "/fonts/BVM-12.bdf")
+        self.score_font = Font(self.resource_path + "/fonts/BVM-25.bdf")
+        self.mesg_font = Font(self.resource_path + "/fonts/BVM-16.bdf")
 
         # colors
         self.court_color = { 0: b'\x00\x00\x00', 1: b'\xff\x00\x00', 2: b'\x00\xff\x00' }
@@ -92,9 +93,9 @@ class Canvas(Qt.QApplication):
 
     def load_logo(self, org):
         try:
-            self.logo = Image.open(f'/usr/share/scoreboard/{org}64.png').convert('RGB')
+            self.logo = Image.open(f'{self.resource_path}/{org}64.png').convert('RGB')
         except:
-            self.logo = Image.open('/usr/share/scoreboard/vbs64.png').convert('RGB')
+            self.logo = Image.open(f'{self.resource_path}/vbs64.png').convert('RGB')
 
 
     def draw_text(self, font, x, y, color, text):

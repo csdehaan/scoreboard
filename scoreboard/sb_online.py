@@ -438,8 +438,11 @@ def sb_online(configfile=None):
         display.send(['shutdown'])
         sleep(1)
 
-    api.logger.debug('Enabling bluetooth')
-    controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)
+    if configfile:
+        controller = Controller(f'SB {config.scoreboard["serial"]}')
+    else:
+        api.logger.debug('Enabling bluetooth')
+        controller = Controller(f'SB {config.scoreboard["serial"]}', bt_button)
 
     match = Match()
 

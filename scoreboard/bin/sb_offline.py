@@ -2,4 +2,5 @@
 
 from scoreboard.sb_offline import sb_offline
 
-sb_offline()
+def main():
+    sb_offline()

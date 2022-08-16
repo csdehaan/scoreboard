@@ -74,20 +74,37 @@ def update_timer(i, msg, seconds):
     global display
     global timer
 
-    display.send(['timer', msg, seconds-i])
-    if seconds-i <= 0:
+    time = 0
+    if seconds > 0: time = seconds-i
+    else: time = i+1
+    display.send(['timer', msg, time])
+    if time <= 0:
         timer.set()
         timer = None
 
 
-# @periodic_task(1)
-# def update_workout(i, workout):
-#     global display
+@periodic_task(1)
+def update_workout(i, workout):
+    global display
+    global timer
 
-#     display.send(['timer', msg, seconds-i])
-#     if seconds-i <= 0:
-#         timer.set()
-#         timer = None
+    if workout.resting:
+        if workout.exercise_rest() < 0:
+            display.send(['mesg', workout.exercise_name(), f'SET: {workout.current_set}', 'REST'])
+        else:
+            display.send(['mesg', workout.exercise_name(), f'SET: {workout.current_set}', f'REST: {workout.time_remaining()}'])
+
+    elif workout.exercise_type() == 'repetitions':
+        display.send(['mesg', workout.exercise_name(), f'SET: {workout.current_set}', f'REPS: {workout.exercise_target()}'])
+    elif workout.exercise_type() == 'duration':
+        display.send(['mesg', workout.exercise_name(), f'SET: {workout.current_set}', f'TIME: {workout.time_remaining()}'])
+    elif workout.exercise_type() == 'rest':
+        display.send(['mesg', workout.exercise_name(), f'TIME: {workout.time_remaining()}'])
+    workout.tick()
+
+    if workout.in_progress() == False and timer != None:
+        timer.set()
+        timer = None
 
 
 
@@ -197,7 +214,7 @@ def rx_score_update(message):
 
     try:
         m = json.loads(message)
-        json2match(m, match)
+        match.from_json(m)
         if m['state'] == 'in_progress':
             controller.set_status_scoring()
             if m['games'][-1]['switch_sides?']:
@@ -219,7 +236,7 @@ def rx_config_update(message):
     global timer
     global workout
 
-    api.logger.info(f'rx_config_update: message={message}')
+    api.logger.debug(f'rx_config_update: message={message}')
 
     try:
         m = json.loads(message)
@@ -237,29 +254,29 @@ def rx_config_update(message):
         cmd = m.get('start_timer')
         if cmd:
             if timer: timer.set()
-            timer = update_timer(m.get('timer_msg'), int(cmd))
+            time = int(cmd)
+            if time != 0: timer = update_timer(m.get('timer_msg'), time)
         cmd = m.get('workout')
         if cmd:
             if timer: timer.set()
             workout = Workout(m.get('workout'))
             workout.start()
+            timer = update_workout(workout)
+        cmd = m.get('ctrl_workout')
+        if cmd:
+            if cmd == 'stop':
+                timer.set()
+                timer = None
+                workout = None
+            if cmd == 'pause':
+                workout.pause()
+            if cmd == 'step':
+                if workout.resting: workout.next_set()
+                else: workout.finish_set()
 
 
     except Exception as e:
         api.logger.error(f'rx_config_update exception: {traceback.format_exc()}')
-
-
-def json2match(js, match):
-    match.team1(js['team1_name'])
-    match.team2(js['team2_name'])
-    match.set(len(js['games']))
-    match.team1_sets(js['games_team1'])
-    match.team2_sets(js['games_team2'])
-    match.team1_score(js['games'][-1]['team1_score'])
-    match.team2_score(js['games'][-1]['team2_score'])
-    match.server(js['games'][-1]['server_number'])
-    match.game_id = js['games'][-1]['id']
-    match.match_id = js['id']
 
 
 
@@ -295,7 +312,7 @@ def match_list():
                 if js_match['state'] == 'in_progress':
                     api.logger.debug(f'check_status_of_matches: match {js_match["id"]} in progress')
                     controller.set_status_scoring()
-                    json2match(js_match, match)
+                    match.from_json(js_match)
                     update_score()
                     return False
 

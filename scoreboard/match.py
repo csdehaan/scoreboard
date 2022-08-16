@@ -24,6 +24,19 @@ class Match:
         self.server(self.serve_order[0])
 
 
+    def from_json(self, js):
+        self.team1(js['team1_name'])
+        self.team2(js['team2_name'])
+        self.set(len(js['games']))
+        self.team1_sets(js['games_team1'])
+        self.team2_sets(js['games_team2'])
+        self.team1_score(js['games'][-1]['team1_score'])
+        self.team2_score(js['games'][-1]['team2_score'])
+        self.server(js['games'][-1]['server_number'])
+        self.game_id = js['games'][-1]['id']
+        self.match_id = js['id']
+
+
     def set(self, set=None):
         if set == None:
             return self.info['set']

@@ -194,14 +194,14 @@ class Canvas:
         self.canvas.Clear()
         if msg:
             [x,l] = [1,16] if (len(msg) % 2 == 0) else [3,15]
-            graphics.DrawText(self.canvas, self.mesg_font, x, 14, self.mesg_color, msg.center(l))
+            graphics.DrawText(self.canvas, self.mesg_font, x, 10, self.mesg_color, msg.center(l))
 
             msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
-            [x,l] = [10,10] if (len(msg2) % 2 == 0) else [3,11]
-            graphics.DrawText(self.canvas, self.time_font, x, 24, self.score_color, msg2.center(l))
+            [x,l] = [8,9] if (len(msg2) % 2 == 0) else [3,10]
+            graphics.DrawText(self.canvas, self.time_font, x, 28, self.score_color, msg2.center(l))
             self.canvas = self.matrix.SwapOnVSync(self.canvas)
         else:
             msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
-            [x,l] = [10,10] if (len(msg2) % 2 == 0) else [3,11]
-            graphics.DrawText(self.canvas, self.time_font, x, 18, self.score_color, msg2.center(l))
+            [x,l] = [8,9] if (len(msg2) % 2 == 0) else [3,10]
+            graphics.DrawText(self.canvas, self.time_font, x, 20, self.score_color, msg2.center(l))
             self.canvas = self.matrix.SwapOnVSync(self.canvas)

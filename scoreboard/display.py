@@ -33,13 +33,13 @@ def listen(disp, port):
                 display.load_logo(msg[1])
                 conn.send('ack')
             if msg[0] == 'mesg':
-                display.show_message(msg[1:4])
+                display.show_message(msg[1:5])
                 conn.send('ack')
             if msg[0] == 'shutdown':
                 print('Shutting down display listener')
                 running = False
         except Exception as e:
-            print(f'QT Display Exception: [{type(e).__name__}] - {e}')
+            print(f'Display Exception: [{type(e).__name__}] - {e}')
         finally:
             conn.close()
 

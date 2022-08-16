@@ -245,13 +245,13 @@ class Canvas(Qt.QApplication):
         self.canvas = Image.new('RGB', (192,64))
         if msg:
             [x,l] = [6,18] if (len(msg) % 2 == 0) else [1,19]
-            self.draw_text(self.mesg_font, x, 28+2, self.mesg_color, msg.center(l))
+            self.draw_text(self.mesg_font, x, 20+2, self.mesg_color, msg.center(l))
 
             msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
-            [x,l] = [10,12] if (len(msg2) % 2 == 0) else [3,13]
-            self.draw_text(self.time_font, x, 48+5, self.score_color, msg2.center(l))
+            [x,l] = [10,11] if (len(msg2) % 2 == 0) else [2,12]
+            self.draw_text(self.time_font, x, 50+5, self.score_color, msg2.center(l))
         else:
             msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
-            [x,l] = [10,12] if (len(msg2) % 2 == 0) else [3,13]
-            self.draw_text(self.time_font, x, 36+5, self.score_color, msg2.center(l))
+            [x,l] = [10,11] if (len(msg2) % 2 == 0) else [3,12]
+            self.draw_text(self.time_font, x, 40+5, self.score_color, msg2.center(l))
         self.update()

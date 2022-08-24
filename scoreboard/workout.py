@@ -1,10 +1,16 @@
 
 import json
 
+
+def exercise_sort(ex):
+    return ex['position']
+
+
 class Workout:
     def __init__(self, data):
         self.workout = json.loads(data)
-        self.current_exercise = None
+        self.workout['exercises'].sort(key=exercise_sort)
+        self.exercise_idx = None
         self.current_set = 0
         self.duration = 0
         self.paused = False
@@ -19,10 +25,11 @@ class Workout:
 
 
     def in_progress(self):
-        return self.current_exercise != None
+        return self.current_exercise() != None
 
 
     def start(self):
+        self.exercise_idx = -1
         self.next_exercise()
 
 
@@ -49,25 +56,39 @@ class Workout:
         return self.exercise_target() - self.duration
 
 
+    def current_exercise(self):
+        try:
+            return self.workout['exercises'][self.exercise_idx]
+        except:
+            return None
+
+
     def next_exercise(self):
         try:
-            self.current_exercise = self.workout['exercises'].pop(0)
+            self.exercise_idx += 1
             self.current_set = 1
-            self.paused = self.current_exercise['pause']
+            self.paused = self.current_exercise()['pause']
         except:
-            self.current_exercise = None
+            self.exercise_idx = None
+
+
+    def previous_exercise(self):
+        if self.exercise_idx > 0:
+            self.exercise_idx -= 1
+            self.current_set = self.exercise_sets()
+            self.paused = self.current_exercise()['pause']
 
 
     def exercise_name(self):
         try:
-            return self.current_exercise['name']
+            return self.current_exercise()['name']
         except:
             return None
 
 
     def exercise_sets(self):
         try:
-            return int(self.current_exercise['sets'])
+            return int(self.current_exercise()['sets'])
         except:
             return 0
 
@@ -79,7 +100,7 @@ class Workout:
         if self.current_set > self.exercise_sets():
             self.next_exercise()
         else:
-            self.paused = self.current_exercise['pause']
+            self.paused = self.current_exercise()['pause']
 
 
     def finish_set(self):
@@ -90,16 +111,25 @@ class Workout:
             self.duration = 0
 
 
+    def previous_set(self):
+        self.resting = False
+        self.duration = 0
+        if self.current_set < 2:
+            self.previous_exercise()
+        else:
+            self.current_set -= 1
+
+
     def exercise_type(self):
         try:
-            return self.current_exercise['exercise_type']
+            return self.current_exercise()['exercise_type']
         except:
             return None
 
 
     def exercise_target(self):
         try:
-            target = self.current_exercise['target'].split('/')
+            target = self.current_exercise()['target'].split('/')
             if len(target) >= self.current_set: return int(target[self.current_set - 1])
             return int(target[-1])
         except:
@@ -108,7 +138,7 @@ class Workout:
 
     def exercise_rest(self):
         try:
-            rest = self.current_exercise['rest'].split('/')
+            rest = self.current_exercise()['rest'].split('/')
             if len(rest) >= self.current_set: return int(rest[self.current_set - 1])
             return int(rest[-1])
         except:
@@ -117,6 +147,6 @@ class Workout:
 
     def exercise_notes(self):
         try:
-            return self.current_exercise['notes']
+            return self.current_exercise()['notes']
         except:
             return ""

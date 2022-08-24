@@ -258,10 +258,11 @@ def rx_config_update(message):
             if time != 0: timer = update_timer(m.get('timer_msg'), time)
         cmd = m.get('workout')
         if cmd:
-            if timer: timer.set()
-            workout = Workout(m.get('workout'))
-            workout.start()
-            timer = update_workout(workout)
+            if (workout == None) or (workout and not workout.in_progress()):
+                if timer: timer.set()
+                workout = Workout(m.get('workout'))
+                workout.start()
+                timer = update_workout(workout)
         cmd = m.get('ctrl_workout')
         if cmd:
             if cmd == 'stop':
@@ -273,6 +274,8 @@ def rx_config_update(message):
             if cmd == 'step':
                 if workout.resting: workout.next_set()
                 else: workout.finish_set()
+            if cmd == 'back':
+                workout.previous_set()
 
 
     except Exception as e:

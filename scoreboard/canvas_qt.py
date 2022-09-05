@@ -1,12 +1,10 @@
 
-from bdfparser import Font
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
-from PyQt5 import Qt, QtCore
+from PyQt5 import Qt
 
 
 class RgbLed(Qt.QWidget):
-    clicked = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -52,22 +50,23 @@ class Canvas(Qt.QApplication):
         self.load_logo(config.display["logo"])
         self.court = config.scoreboard["court"]
         self.canvas = Image.new('RGB', (192,64))
+        self.draw = ImageDraw.Draw(self.canvas)
 
         # fonts
-        self.court_font = Font(self.resource_path + "/fonts/BVM-20.bdf")
-        self.time_font = Font(self.resource_path + "/fonts/BVM-25.bdf")
-        self.player_name_font = Font(self.resource_path + "/fonts/BVM-12.bdf")
-        self.score_font = Font(self.resource_path + "/fonts/BVM-25.bdf")
-        self.mesg_font = Font(self.resource_path + "/fonts/BVM-16.bdf")
+        self.court_font = ImageFont.truetype('VeraMono.ttf', 20)
+        self.time_font = ImageFont.truetype('VeraMono.ttf', 25)
+        self.player_name_font = ImageFont.truetype('VeraMoBd.ttf', 14)
+        self.score_font = ImageFont.truetype('VeraMono.ttf', 25)
+        self.mesg_font = ImageFont.truetype('VeraMono.ttf', 16)
 
         # colors
-        self.court_color = { 0: b'\x00\x00\x00', 1: b'\xff\x00\x00', 2: b'\x00\xff\x00' }
-        self.time_color = { 0: b'\x00\x00\x00', 1: b'\xff\x00\x00', 2: b'\x00\xff\x00' }
-        self.player_name_color = { 0: b'\x00\x00\x00', 1: b'\xff\xbf\x00', 2: b'\x00\xff\x00' }
-        self.server_color = { 0: b'\x00\x00\x00', 1: b'\x00\xff\x00', 2: b'\x00\xff\x00' }
-        self.score_color = { 0: b'\x00\x00\x00', 1: b'\xff\x00\x00', 2: b'\x00\xff\x00' }
-        self.divide_line_color = { 0: b'\x00\x00\x00', 1: b'\x00\x00\xff', 2: b'\x00\xff\x00' }
-        self.mesg_color = { 0: b'\x00\x00\x00', 1: b'\xff\xbf\x00', 2: b'\x00\xff\x00' }
+        self.court_color = (255,0,0)
+        self.time_color = (255,0,0)
+        self.player_name_color = (255,191,0)
+        self.server_color = (0,255,0)
+        self.score_color = (255,0,0)
+        self.divide_line_color = (0,0,255)
+        self.mesg_color = (255,191,0)
 
         # leds
         self.leds = []
@@ -98,36 +97,30 @@ class Canvas(Qt.QApplication):
             self.logo = Image.open(f'{self.resource_path}/vbs64.png').convert('RGB')
 
 
-    def draw_text(self, font, x, y, color, text):
-        render = font.draw(text)
-        mody = y - render.height()
-        img = Image.frombytes('RGB', (render.width(), render.height()), render.tobytes('RGB', color))
-        self.canvas.paste(img, box=(x,mody))
-
-
     def draw_player_name(self, name, max_length, x, y, server):
         if name == None: return
         name = name[0:max_length]
         color = self.player_name_color
         if server: color = self.server_color
-        self.draw_text(self.player_name_font, x, y+2, color, name)
+        self.draw.text((x,y), name, font=self.player_name_font, fill=color)
 
 
     def draw_score(self, score, x, y):
-        self.draw_text(self.score_font, x, y+5, self.score_color, str(score).rjust(2))
+        self.draw.text((x,y), str(score).rjust(2), font=self.score_font, fill=self.score_color)
 
 
     def update_clock(self):
         self.canvas = Image.new('RGB', (192,64))
+        self.draw = ImageDraw.Draw(self.canvas)
         self.canvas.paste(self.logo)
 
         court_txt = f'COURT {self.court}'[0:9]
         courtx = 69 if len(court_txt) % 2 == 0 else 75
-        self.draw_text(self.court_font, courtx, 25+4, self.court_color, court_txt.center(9))
+        self.draw.text((courtx,7), court_txt.center(9), font=self.court_font, fill=self.court_color)
 
         time = datetime.now().strftime("%-I:%M")
         timex = 99 if len(time) % 2 == 0 else 92
-        self.draw_text(self.time_font, timex, 53+5, self.time_color, time)
+        self.draw.text((timex,30), time, font=self.time_font, fill=self.time_color)
 
         self.update()
 
@@ -135,47 +128,47 @@ class Canvas(Qt.QApplication):
 
     def update_match(self, match):
         self.canvas = Image.new('RGB', (192,64))
+        self.draw = ImageDraw.Draw(self.canvas)
         if match.player(1,3):
-            self.draw_player_name(match.player(1, 1), 10, 2, 11, match.server() == 11)
-            self.draw_player_name(match.player(1, 3), 10, 80, 11, match.server() == 13)
+            self.draw_player_name(match.player(1, 1), 10, 2, 0, match.server() == 11)
+            self.draw_player_name(match.player(1, 3), 10, 80, 0, match.server() == 13)
         else:
-            self.draw_player_name(match.player(1, 1), 20, 2, 11, match.server() == 11)
+            self.draw_player_name(match.player(1, 1), 20, 2, 0, match.server() == 11)
 
         if match.player(1,4):
-            self.draw_player_name(match.player(1, 2), 10, 2, 28, match.server() == 12)
-            self.draw_player_name(match.player(1, 4), 10, 80, 28, match.server() == 14)
+            self.draw_player_name(match.player(1, 2), 10, 2, 16, match.server() == 12)
+            self.draw_player_name(match.player(1, 4), 10, 80, 16, match.server() == 14)
         else:
-            self.draw_player_name(match.player(1, 2), 20, 2, 28, match.server() == 12)
+            self.draw_player_name(match.player(1, 2), 20, 2, 16, match.server() == 12)
 
         if match.player(2,3):
-            self.draw_player_name(match.player(2, 1), 10, 2, 44, match.server() == 21)
-            self.draw_player_name(match.player(2, 3), 10, 80, 44, match.server() == 23)
+            self.draw_player_name(match.player(2, 1), 10, 2, 32, match.server() == 21)
+            self.draw_player_name(match.player(2, 3), 10, 80, 32, match.server() == 23)
         else:
-            self.draw_player_name(match.player(2, 1), 20, 2, 44, match.server() == 21)
+            self.draw_player_name(match.player(2, 1), 20, 2, 32, match.server() == 21)
 
         if match.player(2,4):
-            self.draw_player_name(match.player(2, 2), 10, 2, 60, match.server() == 22)
-            self.draw_player_name(match.player(2, 4), 10, 80, 60, match.server() == 24)
+            self.draw_player_name(match.player(2, 2), 10, 2, 48, match.server() == 22)
+            self.draw_player_name(match.player(2, 4), 10, 80, 48, match.server() == 24)
         else:
-            self.draw_player_name(match.player(2, 2), 20, 2, 60, match.server() == 22)
+            self.draw_player_name(match.player(2, 2), 20, 2, 48, match.server() == 22)
 
-        self.draw_score(match.team1_score(), 160, 23)
-        self.draw_score(match.team2_score(), 160, 55)
+        self.draw_score(match.team1_score(), 160, -1)
+        self.draw_score(match.team2_score(), 160, 31)
 
-        draw = ImageDraw.Draw(self.canvas)
         if match.team1_sets() > 0:
-            draw.pieslice([(181,25),(185,29)], start=0.0, end=360.0, fill=(0,255,0), outline=(0,255,0))
+            self.draw.pieslice([(181,25),(185,29)], start=0.0, end=360.0, fill=(0,255,0), outline=(0,255,0))
 
         if match.team1_sets() > 1:
-            draw.pieslice([(171,25),(175,29)], start=0.0, end=360.0, fill=(0,255,0), outline=(0,255,0))
+            self.draw.pieslice([(171,25),(175,29)], start=0.0, end=360.0, fill=(0,255,0), outline=(0,255,0))
 
         if match.team2_sets() > 0:
-            draw.pieslice([(181,57),(185,61)], start=0.0, end=360.0, fill=(0,255,0), outline=(0,255,0))
+            self.draw.pieslice([(181,57),(185,61)], start=0.0, end=360.0, fill=(0,255,0), outline=(0,255,0))
 
         if match.team2_sets() > 1:
-            draw.pieslice([(171,57),(175,61)], start=0.0, end=360.0, fill=(0,255,0), outline=(0,255,0))
+            self.draw.pieslice([(171,57),(175,61)], start=0.0, end=360.0, fill=(0,255,0), outline=(0,255,0))
 
-        draw.line([(0,32),(191,32)], fill=(0,0,255), width=1)
+        self.draw.line([(0,32),(191,32)], fill=self.divide_line_color, width=1)
         self.update()
 
 
@@ -204,54 +197,57 @@ class Canvas(Qt.QApplication):
         refx = 4 if (len(ref) % 2 == 0) else 8
 
         self.canvas = Image.new('RGB', (192,64))
-        self.draw_player_name(next_match.center(26), 26, nextx, 10, True)
-        self.draw_player_name(team1.center(26), 26, team1x, 23, False)
-        self.draw_player_name("VS".center(26), 26, 4, 36, False)
-        self.draw_player_name(team2.center(26), 26, team2x, 49, False)
-        self.draw_player_name(ref.center(26), 26, refx, 62, False)
+        self.draw = ImageDraw.Draw(self.canvas)
+        self.draw_player_name(next_match.center(22), 22, nextx, -1, True)
+        self.draw_player_name(team1.center(22), 22, team1x, 12, False)
+        self.draw_player_name("VS".center(22), 22, 4, 24, False)
+        self.draw_player_name(team2.center(22), 22, team2x, 36, False)
+        self.draw_player_name(ref.center(22), 22, refx, 48, False)
         self.update()
 
 
     def show_message(self, msg):
         self.canvas = Image.new('RGB', (192,64))
+        self.draw = ImageDraw.Draw(self.canvas)
         if len(msg) == 1:
             [x,l] = [6,18] if (len(msg[0]) % 2 == 0) else [1,19]
-            self.draw_text(self.mesg_font, x, 36+2, self.mesg_color, msg[0].center(l))
+            self.draw.text((x,22), msg[0].center(l), font=self.mesg_font, fill=self.mesg_color)
         if len(msg) == 2:
             [x,l] = [6,18] if (len(msg[0]) % 2 == 0) else [1,19]
-            self.draw_text(self.mesg_font, x, 28+2, self.mesg_color, msg[0].center(l))
+            self.draw.text((x,10), msg[0].center(l), font=self.mesg_font, fill=self.mesg_color)
             [x,l] = [6,18] if (len(msg[1]) % 2 == 0) else [1,19]
-            self.draw_text(self.mesg_font, x, 48+2, self.mesg_color, msg[1].center(l))
+            self.draw.text((x,32), msg[1].center(l), font=self.mesg_font, fill=self.mesg_color)
         if len(msg) == 3:
             [x,l] = [6,18] if (len(msg[0]) % 2 == 0) else [1,19]
-            self.draw_text(self.mesg_font, x, 18+2, self.mesg_color, msg[0].center(l))
+            self.draw.text((x,3), msg[0].center(l), font=self.mesg_font, fill=self.mesg_color)
             [x,l] = [6,18] if (len(msg[1]) % 2 == 0) else [1,19]
-            self.draw_text(self.mesg_font, x, 38+2, self.mesg_color, msg[1].center(l))
+            self.draw.text((x,23), msg[1].center(l), font=self.mesg_font, fill=self.mesg_color)
             [x,l] = [6,18] if (len(msg[2]) % 2 == 0) else [1,19]
-            self.draw_text(self.mesg_font, x, 58+2, self.mesg_color, msg[2].center(l))
+            self.draw.text((x,43), msg[2].center(l), font=self.mesg_font, fill=self.mesg_color)
         if len(msg) > 3:
             [x,l] = [6,18] if (len(msg[0]) % 2 == 0) else [1,19]
-            self.draw_text(self.mesg_font, x, 14+2, self.mesg_color, msg[0].center(l))
+            self.draw.text((x,0), msg[0].center(l), font=self.mesg_font, fill=self.mesg_color)
             [x,l] = [6,18] if (len(msg[1]) % 2 == 0) else [1,19]
-            self.draw_text(self.mesg_font, x, 30+2, self.mesg_color, msg[1].center(l))
+            self.draw.text((x,15), msg[1].center(l), font=self.mesg_font, fill=self.mesg_color)
             [x,l] = [6,18] if (len(msg[2]) % 2 == 0) else [1,19]
-            self.draw_text(self.mesg_font, x, 46+2, self.mesg_color, msg[2].center(l))
+            self.draw.text((x,30), msg[2].center(l), font=self.mesg_font, fill=self.mesg_color)
             [x,l] = [6,18] if (len(msg[3]) % 2 == 0) else [1,19]
-            self.draw_text(self.mesg_font, x, 62+2, self.mesg_color, msg[3].center(l))
+            self.draw.text((x,45), msg[3].center(l), font=self.mesg_font, fill=self.mesg_color)
         self.update()
 
 
     def show_timer(self, msg, count):
         self.canvas = Image.new('RGB', (192,64))
+        self.draw = ImageDraw.Draw(self.canvas)
         if msg:
             [x,l] = [6,18] if (len(msg) % 2 == 0) else [1,19]
-            self.draw_text(self.mesg_font, x, 20+2, self.mesg_color, msg.center(l))
+            self.draw.text((x,8), msg.center(l), font=self.mesg_font, fill=self.mesg_color)
 
             msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
             [x,l] = [10,11] if (len(msg2) % 2 == 0) else [2,12]
-            self.draw_text(self.time_font, x, 50+5, self.score_color, msg2.center(l))
+            self.draw.text((x,30), msg2.center(l), font=self.time_font, fill=self.score_color)
         else:
             msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
             [x,l] = [10,11] if (len(msg2) % 2 == 0) else [3,12]
-            self.draw_text(self.time_font, x, 40+5, self.score_color, msg2.center(l))
+            self.draw.text((x,18), msg2.center(l), font=self.time_font, fill=self.score_color)
         self.update()

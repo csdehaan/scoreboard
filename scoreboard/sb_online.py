@@ -150,10 +150,18 @@ def after_timeout():
     match_list()
 
 
-@periodic_task(1, 60, after_timeout)
-def update_timeout(i, name):
+@periodic_task(1, 1000, after_timeout)
+def update_timeout(i, name, length=60):
     global display
-    display.send(['mesg', name, 'TIMEOUT', str(60-i)])
+    global timeout
+
+    count = length-i
+    if length > 60:
+        msg = f'{int(count/60)}:{(int(count)%60):02}'
+    else:
+        msg = str(count)
+    display.send(['mesg', name, 'TIMEOUT', msg])
+    if count <= 0: timeout.set()
 
 
 def side_switch_clear():
@@ -246,7 +254,8 @@ def rx_config_update(message):
             api.logger.info(rc)
         cmd = m.get('start_timeout')
         if cmd:
-            timeout = update_timeout(cmd)
+            if cmd == 'MEDICAL': timeout = update_timeout(cmd, 300)
+            else: timeout = update_timeout(cmd)
         cmd = m.get('end_timeout')
         if cmd:
             if timeout:

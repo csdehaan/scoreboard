@@ -21,7 +21,7 @@ class Display:
         self.matrix = RGBMatrix(options = options)
         self.frame_canvas = self.matrix.CreateFrameCanvas()
 
-        if self.cols == 192:
+        if config.display.getint("cols") * config.display.getint("chain_length", 1) == 192:
             from scoreboard.canvas_192x64 import Canvas
         else:
             from scoreboard.canvas_96x32 import Canvas

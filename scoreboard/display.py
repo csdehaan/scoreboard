@@ -27,10 +27,10 @@ def listen(disp, port):
                 display.show_timer(msg[1], msg[2])
                 conn.send('ack')
             if msg[0] == 'court':
-                display.court = msg[1]
+                display.canvas.court = msg[1]
                 conn.send('ack')
             if msg[0] == 'logo':
-                display.load_logo(msg[1])
+                display.canvas.load_logo(msg[1])
                 conn.send('ack')
             if msg[0] == 'mesg':
                 display.show_message(msg[1:5])
@@ -51,22 +51,17 @@ def rgb_display(config_file=None):
     config = Config(config_file)
     config.read()
 
-    cols = config.display.getint("cols") * config.display.getint("chain_length", 1)
-
     if config_file:
-        from scoreboard.canvas_qt import Canvas
-    elif cols == 192:
-        from scoreboard.canvas_192x64 import Canvas
+        from scoreboard.display_qt import Display
     else:
-        from scoreboard.canvas_96x32 import Canvas
-    display = Canvas(config)
+        from scoreboard.display_led import Display
+    display = Display(config)
 
     if config_file:
         listen_thread = Thread(target=listen, args=(display,config.display.getint("port", 6000)))
         listen_thread.start()
 
-        display.win.show()
-        display.exec_()
+        display.run()
 
         print('Qt Display closed. Waiting for listen thread to exit.')
         listen_thread.join()

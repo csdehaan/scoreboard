@@ -22,6 +22,7 @@ class AckTimeout(Exception):
     pass
 
 countdown = 0
+countdown_timer = None
 display = None
 config = None
 api = None
@@ -108,7 +109,7 @@ def update_workout(i, workout):
 
 
 
-@periodic_task(1)
+@periodic_task(15)
 def update_next_match(i):
     global countdown
     global display
@@ -120,7 +121,7 @@ def update_next_match(i):
     if timer: return
 
     try:
-        if (i % 10 == 0) and (disconnected or controller.status() != 'scoring'):
+        if (disconnected or controller.status() != 'scoring'):
             matches = match_list()
             if matches:
                 if len(matches['names']) > 0:
@@ -134,12 +135,27 @@ def update_next_match(i):
                     controller.set_status_no_matches()
                     display.send(['clock'])
 
-        if next_match and countdown > 0 and (disconnected or controller.status() != 'scoring'):
-            countdown -= 1
-            display.send(['next_match', next_match, countdown])
-
     except Exception as e:
         api.logger.error(f'periodic_update exception: {traceback.format_exc()}')
+
+
+@periodic_task(1)
+def update_next_match_countdown(i):
+    global countdown
+    global countdown_timer
+    global display
+    global controller
+    global disconnected
+    global next_match
+    global timer
+
+    countdown -= 1
+    if next_match and countdown > 0 and (disconnected or controller.status() != 'scoring'):
+        display.send(['next_match', next_match, countdown])
+
+    if countdown <= 0:
+        countdown_timer.set()
+        countdown_timer = None
 
 
 
@@ -205,11 +221,13 @@ def next_match_in(wait_time):
 
 def next_match_now():
     global countdown
+    global countdown_timer
     global controller
     global config
 
     controller.set_status_waiting()
     countdown = config.scoreboard.getint('next_match_wait', 600)
+    countdown_timer = update_next_match_countdown()
 
 
 def rx_score_update(message):
@@ -431,7 +449,6 @@ def sb_online(configfile=None):
     global api
     global controller
     global match
-    global countdown
     global config
     global display
     global renogy

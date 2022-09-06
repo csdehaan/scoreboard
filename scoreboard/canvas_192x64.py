@@ -1,33 +1,16 @@
 
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 
 class Canvas:
 
     def __init__(self, config):
-        options = RGBMatrixOptions()
-        options.drop_privileges = False
-        options.rows = config.display.getint("rows")
-        options.cols = config.display.getint("cols")
-        options.chain_length = config.display.getint("chain_length", 1)
-        options.parallel = config.display.getint("parallel", 1)
-        options.row_address_type = config.display.getint("row_address_type", 0)
-        options.multiplexing = config.display.getint("multiplexing", 0)
-        options.pwm_bits = config.display.getint("pwm_bits", 11)
-        options.brightness = config.display.getint("brightness", 100)
-        options.pwm_lsb_nanoseconds = config.display.getint("pwm_lsb_nanoseconds", 130)
-        options.led_rgb_sequence = config.display.get("led_rgb_sequence", "RGB")
-        options.gpio_slowdown = config.display.getint("gpio_slowdown", 1)
-        options.limit_refresh_rate_hz = config.display.getint("limit_refresh", 0)
-        self.matrix = RGBMatrix(options = options)
-        self.canvas = self.matrix.CreateFrameCanvas()
 
         self.rows = 64
         self.cols = 192
+        self.resource_path = config.display.get("resource_path", "/usr/share/scoreboard")
         self.load_logo(config.display["logo"])
         self.court = config.scoreboard["court"]
-        self.clear()
 
         # fonts
         self.court_font = ImageFont.truetype('VeraMono.ttf', 20)
@@ -45,23 +28,19 @@ class Canvas:
         self.divide_line_color = (0,0,255)
         self.mesg_color = (255,191,0)
 
+        self.clear()
+
 
     def clear(self):
         self.image = Image.new('RGB', (self.cols,self.rows))
         self.draw = ImageDraw.Draw(self.image)
 
 
-    def update(self):
-        self.canvas.Clear()
-        self.canvas.SetImage(self.image)
-        self.canvas = self.matrix.SwapOnVSync(self.canvas)
-
-
     def load_logo(self, org):
         try:
-            self.logo = Image.open(f'/usr/share/scoreboard/{org}64.png').convert('RGB')
+            self.logo = Image.open(f'{self.resource_path}/{org}64.png').convert('RGB')
         except:
-            self.logo = Image.open('/usr/share/scoreboard/vbs64.png').convert('RGB')
+            self.logo = Image.open(f'{self.resource_path}/vbs64.png').convert('RGB')
 
 
     def draw_player_name(self, name, max_length, x, y, server):
@@ -87,8 +66,6 @@ class Canvas:
         time = datetime.now().strftime("%-I:%M")
         timex = 99 if len(time) % 2 == 0 else 92
         self.draw.text((timex,30), time, font=self.time_font, fill=self.time_color)
-
-        self.update()
 
 
 
@@ -136,8 +113,6 @@ class Canvas:
 
         self.draw.line([(0,32),(191,32)], fill=self.divide_line_color, width=1)
 
-        self.update()
-
 
     def update_next_match(self, teams, countdown=-1):
         if int(countdown) > 0:
@@ -169,7 +144,6 @@ class Canvas:
         self.draw_player_name("VS".center(22), 22, 4, 24, False)
         self.draw_player_name(team2.center(22), 22, team2x, 36, False)
         self.draw_player_name(ref.center(22), 22, refx, 48, False)
-        self.update()
 
 
     def show_message(self, msg):
@@ -198,7 +172,6 @@ class Canvas:
             self.draw.text((x,30), msg[2].center(l), font=self.mesg_font, fill=self.mesg_color)
             [x,l] = [6,18] if (len(msg[3]) % 2 == 0) else [1,19]
             self.draw.text((x,45), msg[3].center(l), font=self.mesg_font, fill=self.mesg_color)
-        self.update()
 
 
     def show_timer(self, msg, count):
@@ -214,4 +187,3 @@ class Canvas:
             msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
             [x,l] = [10,11] if (len(msg2) % 2 == 0) else [3,12]
             self.draw.text((x,18), msg2.center(l), font=self.time_font, fill=self.score_color)
-        self.update()

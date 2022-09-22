@@ -1,8 +1,9 @@
 
 import os
-import urllib.request
+import urllib
 import hashlib
 import base64
+from time import sleep
 
 from scoreboard import Config, Version
 from scoreboard.api import Api
@@ -12,16 +13,22 @@ from scoreboard.display_connection import Display
 def software_update(force):
     config = Config()
     config.read()
+    update = False
+    sw = None
 
     api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 10))
-    sw = api.scoreboard_software()
+    while sw == None:
+        try:
+            sw = api.scoreboard_software()
+        except urllib.error.URLError:
+            sleep(1)
 
-    update = False
     if force: update = True
     if sw['major_version'] != 0:
         if Version.major != sw['major_version']: update = True
         if Version.minor != sw['minor_version']: update = True
         if Version.debug != sw['debug_version']: update = True
+
 
     if update:
         display = Display('localhost', config.display.getint("port", 6000))

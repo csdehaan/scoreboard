@@ -4,6 +4,7 @@ import sys
 from time import sleep
 import subprocess
 from scoreboard import Config
+from scoreboard.gpio import GPIO
 from scoreboard.display_connection import Display
 import signal
 
@@ -12,15 +13,17 @@ process = None
 mode = None
 running = True
 mode_pin = 15
+gpio = None
 
 
 def switch_toggled(channel):
     global process
     global mode
     global mode_pin
+    global gpio
 
     sleep(0.25)
-    if process and ((GPIO.input(mode_pin) == 0 and mode == 'offline') or (GPIO.input(mode_pin) == 1 and mode == 'online')):
+    if process and ((gpio.online() and mode == 'offline') or (gpio.offline() and mode == 'online')):
         print('Killing old process')
         process.kill()
         process = None
@@ -44,30 +47,28 @@ def main():
     global mode
     global mode_pin
     global running
+    global gpio
 
     if len(sys.argv) > 1:
         qt = True
         configfile = sys.argv[1]
     else:
         qt = False
-        import RPi.GPIO as GPIO
 
     if qt:
         signal.signal(signal.SIGTERM, sig_handler)
         signal.signal(signal.SIGINT, sig_handler)
-        display_process = subprocess.Popen(["display",configfile])
+        subprocess.Popen(["display",configfile])
         config = Config(configfile)
         config.read()
+        gpio = GPIO(config, False)
     else:
         config = Config()
         config.read()
-        mode_pin = config.scoreboard.getint("mode_pin", 15)
+        gpio = GPIO(config)
 
-        # setup the online / offline switch
-        GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(mode_pin, GPIO.IN, GPIO.PUD_UP)
-        GPIO.add_event_detect(mode_pin, GPIO.BOTH, callback=switch_toggled, bouncetime=500)
+    # setup the online / offline switch
+    gpio.set_online_switch_callback(switch_toggled)
 
 
     display = Display('localhost', config.display.getint("port", 6000))
@@ -86,7 +87,7 @@ def main():
                 process.wait()
                 print('QT Mode Exited')
 
-            elif GPIO.input(mode_pin) == 0:
+            elif gpio.online():
                 display.send(['mesg', 'Connecting ...'], 1, 20)
                 print('Starting Online Mode')
 

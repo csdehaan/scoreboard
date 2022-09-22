@@ -16,6 +16,7 @@ from scoreboard.api import Api
 from scoreboard.display_connection import Display
 from scoreboard.renogy import Renogy
 from scoreboard.workout import Workout
+from scoreboard.gpio import GPIO
 
 
 class AckTimeout(Exception):
@@ -35,6 +36,7 @@ timeout = None
 next_match = None
 timer = None
 workout = None
+gpio = None
 
 
 def ping_timeout(ws_app, error):
@@ -361,6 +363,7 @@ def match_list():
 def update_status(i):
     global api
     global renogy
+    global gpio
 
     status = {}
     try:
@@ -378,6 +381,13 @@ def update_status(i):
             status["batt_charge"] = renogy.batt_soc
             status["load_watts"] = renogy.load_watts
             status["pv_watts"] = renogy.pv_watts
+    except:
+        pass
+
+    try:
+        status["fan_status"] = gpio.fan_alert()
+        if status["fan_status"]:
+            gpio.fan_alert_clear()
     except:
         pass
 
@@ -444,7 +454,6 @@ def bt_button(value, options):
             api.logger.error(f'failed to make config change from: {bytes(value).decode("utf8")}')
 
 
-
 def sb_online(configfile=None):
     global api
     global controller
@@ -452,6 +461,7 @@ def sb_online(configfile=None):
     global config
     global display
     global renogy
+    global gpio
 
     restart_display = False
 
@@ -503,6 +513,8 @@ def sb_online(configfile=None):
     renogy_addr = config.scoreboard.getint("renogy_addr", 255)
     if renogy_port:
         renogy = Renogy(renogy_port, renogy_baud, renogy_addr)
+
+    gpio = GPIO(config, configfile==None)
 
     update_next_match()
     update_status()

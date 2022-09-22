@@ -21,7 +21,7 @@ setuptools.setup(
         'License :: Other/Proprietary License'
     ],
     packages = setuptools.find_packages(),
-    ext_modules = cythonize("scoreboard/*.py", language_level = "3"),
+    ext_modules = cythonize("scoreboard/*.py", exclude="scoreboard/gpio.py", language_level = "3"),
     entry_points = {
         'gui_scripts': [
             'cfg_update = scoreboard.bin.cfg_update:main',

@@ -514,7 +514,7 @@ def sb_online(configfile=None):
     if renogy_port:
         renogy = Renogy(renogy_port, renogy_baud, renogy_addr)
 
-    gpio = GPIO(config, configfile==None)
+    gpio = GPIO(config)
 
     update_next_match()
     update_status()

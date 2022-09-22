@@ -61,7 +61,7 @@ def main():
         subprocess.Popen(["display",configfile])
         config = Config(configfile)
         config.read()
-        gpio = GPIO(config, False)
+        gpio = GPIO(config)
     else:
         config = Config()
         config.read()

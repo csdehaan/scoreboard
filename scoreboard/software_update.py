@@ -20,7 +20,8 @@ def software_update(force):
     while sw == None:
         try:
             sw = api.scoreboard_software()
-        except urllib.error.URLError:
+        except urllib.error.URLError as e:
+            print(e)
             sleep(1)
 
     if force: update = True

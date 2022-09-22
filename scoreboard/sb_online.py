@@ -385,8 +385,8 @@ def update_status(i):
         pass
 
     try:
-        status["fan_status"] = gpio.fan_alert()
-        if status["fan_status"]:
+        status["fan_alert"] = gpio.fan_alert()
+        if status["fan_alert"]:
             gpio.fan_alert_clear()
     except:
         pass

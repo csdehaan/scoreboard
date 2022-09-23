@@ -1,5 +1,6 @@
 
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
+from scoreboard.gpio import GPIO
 
 class Display:
 
@@ -26,6 +27,9 @@ class Display:
         else:
             from scoreboard.canvas_96x32 import Canvas
         self.canvas = Canvas(config)
+
+        gpio = GPIO(config)
+        gpio.enable_display()
 
 
     def update(self):

@@ -13,13 +13,16 @@ class GPIO:
         self.fan_fail_pin = config.scoreboard.getint("fan_fail_pin")
         self.fan_clear_pin = config.scoreboard.getint("fan_clear_pin")
         self.mode_pin = config.scoreboard.getint("mode_pin", 15)
+        self.display_enable_pin = config.scoreboard.getint("display_enable_pin")
         if rpi:
             RPI_GPIO.setwarnings(False)
             RPI_GPIO.setmode(RPI_GPIO.BCM)
-            RPI_GPIO.setup(self.fan_fail_pin, RPI_GPIO.IN, RPI_GPIO.PUD_UP)
-            RPI_GPIO.setup(self.fan_clear_pin, RPI_GPIO.OUT)
-            RPI_GPIO.output(self.fan_clear_pin, RPI_GPIO.LOW)
+            if self.fan_fail_pin: RPI_GPIO.setup(self.fan_fail_pin, RPI_GPIO.IN, RPI_GPIO.PUD_UP)
+            if self.fan_clear_pin:
+                RPI_GPIO.setup(self.fan_clear_pin, RPI_GPIO.OUT)
+                RPI_GPIO.output(self.fan_clear_pin, RPI_GPIO.LOW)
             RPI_GPIO.setup(self.mode_pin, RPI_GPIO.IN, RPI_GPIO.PUD_UP)
+            if self.display_enable_pin: RPI_GPIO.setup(self.display_enable_pin, RPI_GPIO.OUT)
 
 
     def set_online_switch_callback(self, callback):
@@ -55,3 +58,10 @@ class GPIO:
             RPI_GPIO.output(self.fan_clear_pin, RPI_GPIO.HIGH)
             sleep(0.2)
             RPI_GPIO.output(self.fan_clear_pin, RPI_GPIO.LOW)
+
+
+    def enable_display(self, enable=True):
+        global rpi
+        if rpi and self.display_enable_pin:
+            if enable: RPI_GPIO.output(self.display_enable_pin, RPI_GPIO.LOW)
+            else: RPI_GPIO.output(self.display_enable_pin, RPI_GPIO.HIGH)

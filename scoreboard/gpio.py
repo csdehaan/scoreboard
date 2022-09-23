@@ -22,7 +22,6 @@ class GPIO:
                 RPI_GPIO.setup(self.fan_clear_pin, RPI_GPIO.OUT)
                 RPI_GPIO.output(self.fan_clear_pin, RPI_GPIO.LOW)
             RPI_GPIO.setup(self.mode_pin, RPI_GPIO.IN, RPI_GPIO.PUD_UP)
-            if self.display_enable_pin: RPI_GPIO.setup(self.display_enable_pin, RPI_GPIO.OUT)
 
 
     def set_online_switch_callback(self, callback):
@@ -58,6 +57,11 @@ class GPIO:
             RPI_GPIO.output(self.fan_clear_pin, RPI_GPIO.HIGH)
             sleep(0.2)
             RPI_GPIO.output(self.fan_clear_pin, RPI_GPIO.LOW)
+
+
+    def setup_display(self):
+        if rpi and self.display_enable_pin:
+            if self.display_enable_pin: RPI_GPIO.setup(self.display_enable_pin, RPI_GPIO.OUT)
 
 
     def enable_display(self, enable=True):

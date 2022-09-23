@@ -29,6 +29,7 @@ class Display:
         self.canvas = Canvas(config)
 
         gpio = GPIO(config)
+        gpio.setup_display()
         gpio.enable_display()
 
 

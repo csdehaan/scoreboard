@@ -62,6 +62,11 @@ class Api:
         return json.loads(response)
 
 
+    def next_match(self):
+        response = request.urlopen(f'{HTTP}://{SERVER}/apiv1/next_match.json?api_key='+self.api_key, timeout=5).read().decode()
+        return json.loads(response)
+
+
     def start_game(self, match_id):
         response = request.urlopen(f'{HTTP}://{SERVER}/apiv1/matches/'+str(match_id)+'/start_game.json?api_key='+self.api_key, timeout=5).read().decode()
         return json.loads(response)

@@ -22,6 +22,7 @@ class Match:
         self.team1_score(0)
         self.team2_score(0)
         self.server(self.serve_order[0])
+        self.side_switch(False)
 
 
     def from_json(self, js):
@@ -33,6 +34,7 @@ class Match:
         self.team1_score(js['games'][-1]['team1_score'])
         self.team2_score(js['games'][-1]['team2_score'])
         self.server(js['games'][-1]['server_number'])
+        self.side_switch(js['games'][-1]['switch_sides?'])
         self.game_id = js['games'][-1]['id']
         self.match_id = js['id']
 
@@ -111,6 +113,18 @@ class Match:
         if server == None:
             return self.info['server']
         self.info['server'] = server
+
+
+    def side_switch(self, switch=None):
+        if switch == None:
+            return self.switch_sides and not self.switch_sides_taken
+        else:
+            if switch:
+                self.switch_sides_taken = self.switch_sides
+                self.switch_sides = True
+            else:
+                self.switch_sides = False
+                self.switch_sides_taken = False
 
 
     def team1_add_point(self):

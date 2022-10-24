@@ -48,7 +48,7 @@ class GPIO:
         global rpi
         if rpi and self.fan_fail_pin:
             return RPI_GPIO.input(self.fan_fail_pin) == 0
-        return False
+        return None
 
 
     def fan_alert_clear(self):

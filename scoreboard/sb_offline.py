@@ -4,7 +4,6 @@ from pynput import keyboard
 from collections import deque
 import threading
 import re
-import traceback
 
 from scoreboard import Scoreboard
 

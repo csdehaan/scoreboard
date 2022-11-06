@@ -6,7 +6,6 @@ import json
 import threading
 import subprocess
 import socket
-import traceback
 from websocket import WebSocketTimeoutException
 import logging
 
@@ -40,6 +39,7 @@ def ping_timeout(ws_app, error):
     if isinstance(error, WebSocketTimeoutException):
         scoreboard.message('Connecting ...')
         scoreboard.set_disconnected()
+        api.logger.warning('Ping Timeout')
 
 
 def periodic_task(interval, times = 1000000000, cleanup = None):
@@ -115,7 +115,7 @@ def update_next_match(i):
 
     try:
         api.logger.debug(f'update_next_match: scoreboard mode = {scoreboard.mode}')
-        if (not scoreboard.is_connected() or scoreboard.mode != 'score'):
+        if (scoreboard.is_disconnected() or scoreboard.mode != 'score'):
             next_match = get_next_match_teams()
             api.logger.debug(f'update_next_match next match = {next_match}')
             if next_match == False:
@@ -128,7 +128,7 @@ def update_next_match(i):
                 scoreboard.update_clock()
 
     except Exception as e:
-        api.logger.error(f'update_next_match exception: {traceback.format_exc()}')
+        api.logger.error(f'update_next_match exception: {type(e).__name__} - {e}')
 
 
 @periodic_task(1)
@@ -140,7 +140,7 @@ def update_next_match_countdown(i):
     global timer
 
     countdown -= 1
-    if next_match and countdown > 0 and (not scoreboard.is_connected() or scoreboard.mode != 'score'):
+    if next_match and countdown > 0 and (scoreboard.is_disconnected() or scoreboard.mode != 'score'):
         scoreboard.next_match(next_match[0], next_match[1], next_match[2], countdown)
 
     if countdown <= 0:
@@ -166,7 +166,7 @@ def update_timeout(i, name, length=60):
         msg = f'{int(count/60)}:{(int(count)%60):02}'
     else:
         msg = str(count)
-    scoreboard.messsage(name, 'TIMEOUT', msg)
+    scoreboard.message(name, 'TIMEOUT', msg)
     if count <= 0: timeout.set()
 
 
@@ -194,7 +194,7 @@ def update_score():
         if switching_sides == False: scoreboard.update_score()
 
     except Exception as e:
-        api.logger.error(f'update_score exception: {traceback.format_exc()}')
+        api.logger.error(f'update_score exception: {type(e).__name__} - {e}')
 
 
 def next_match_in(wait_time):
@@ -231,7 +231,7 @@ def rx_score_update(message):
             next_match_in(scoreboard.config.scoreboard.getint('end_match_delay', 60))
 
     except Exception as e:
-        api.logger.error(f'rx_score_update exception: {traceback.format_exc()}')
+        api.logger.error(f'rx_score_update exception: {type(e).__name__} - {e}')
 
 
 def rx_config_update(message):
@@ -284,7 +284,7 @@ def rx_config_update(message):
 
 
     except Exception as e:
-        api.logger.error(f'rx_config_update exception: {traceback.format_exc()}')
+        api.logger.error(f'rx_config_update exception: {type(e).__name__} - {e}')
 
 
 
@@ -295,8 +295,8 @@ def match_list():
     api.logger.debug('match_list')
     try:
         if scoreboard.is_disconnected():
-            if api.connection.connected: api.connection.disconnect()
-            api.connection.connect()
+            # if api.connection.connected: api.connection.disconnect()
+            # api.connection.connect()
             scoreboard.set_connected()
         matches = api.matches()
         if len(matches) > 0:
@@ -327,7 +327,7 @@ def match_list():
                 return {'names': names, 'ids': ids, 'teams': teams}
 
     except Exception as e:
-        api.logger.error(f'check_status_of_matches exception: {traceback.format_exc()}')
+        api.logger.error(f'check_status_of_matches exception: {type(e).__name__} - {e}')
 
     return {'names': [], 'ids': [], 'teams': []}
 
@@ -340,8 +340,8 @@ def get_next_match_teams():
     api.logger.debug('get_next_match_teams')
     try:
         if scoreboard.is_disconnected():
-            if api.connection.connected: api.connection.disconnect()
-            api.connection.connect()
+            # if api.connection.connected: api.connection.disconnect()
+            # api.connection.connect()
             scoreboard.set_connected()
         next_match = api.next_match()
         if next_match:
@@ -364,7 +364,7 @@ def get_next_match_teams():
                 return teams
 
     except Exception as e:
-        api.logger.error(f'get_next_match_teams exception: {traceback.format_exc()}')
+        api.logger.error(f'get_next_match_teams exception: {type(e).__name__} - {e}')
 
     return []
 

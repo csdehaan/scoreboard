@@ -58,13 +58,21 @@ def rgb_display(config_file=None):
     display = Display(config)
 
     if config_file:
+        from scoreboard.display_connection import Display as Connection
+        import psutil
         listen_thread = Thread(target=listen, args=(display,config.display.getint("port", 6000)))
         listen_thread.start()
 
         display.run()
 
         print('Qt Display closed. Waiting for listen thread to exit.')
+        conn = Connection('localhost', config.display.getint("port", 6000))
+        conn.send(['shutdown'], 1, 1)
         listen_thread.join()
         print('Thread joined')
+        print('Killing scoreboard')
+        for proc in psutil.process_iter():
+            if proc.name() == 'scoreboard': proc.terminate()
+        print('exiting')
     else:
         listen(display, 6000)

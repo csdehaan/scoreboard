@@ -14,6 +14,7 @@ mode = None
 running = True
 mode_pin = 15
 gpio = None
+notified = False
 
 
 def switch_toggled(channel):
@@ -47,6 +48,7 @@ def main():
     global mode_pin
     global running
     global gpio
+    global notified
 
     if len(sys.argv) > 1:
         qt = True
@@ -62,6 +64,7 @@ def main():
         config.read()
         gpio = GPIO(config)
     else:
+        from systemd.daemon import notify
         config = Config()
         config.read()
         gpio = GPIO(config)
@@ -94,21 +97,16 @@ def main():
                 mode = 'online'
                 sleep(0.25)
 
-                # enable wifi
-                #with open('/etc/wpa_supplicant.conf', "w") as outfile:
-                #    subprocess.run(["wpa_passphrase", config.wifi["ssid"], config.wifi["password"]], stdout=outfile)
-                #    subprocess.run(["cat", "/etc/wpa_supplicant.base"], stdout=outfile)
-                #subprocess.run(["ifup", "wlan0"])
-                #subprocess.run(["wpa_cli", "reconfigure"])
-
-                # start the bore local tunnel for remote login
-                #subprocess.run(["/etc/init.d/S55bore", "restart"])
+                # start wpa_supplicant?
+                #subprocess.run(["systemctl", "start", "wpa_supplicant"])
 
                 # check for software updates
                 subprocess.run(["software_update"])
 
                 # start the app
                 process = subprocess.Popen(["sb_online"])
+                if not notified: notify("READY=1")
+                notified = True
                 process.wait()
                 print('Online Mode Exited')
 
@@ -119,6 +117,8 @@ def main():
                 # offline mode
                 mode = 'offline'
                 process = subprocess.Popen(["sb_offline"])
+                if not notified: notify("READY=1")
+                notified = True
                 process.wait()
                 print('Offline Mode Exited')
 

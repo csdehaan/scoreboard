@@ -19,6 +19,7 @@ class Display:
                 if connection.poll(timeout):
                     ack = connection.recv()
             except Exception as e:
+                print(f'display_connection exception (try={tries}): {type(e).__name__} - {e}')
                 sleep(0.25)
             finally:
                 tries = tries + 1

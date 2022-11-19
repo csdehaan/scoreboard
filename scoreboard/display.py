@@ -75,4 +75,6 @@ def rgb_display(config_file=None):
             if proc.name() == 'scoreboard': proc.terminate()
         print('exiting')
     else:
+        from systemd.daemon import notify, Notification
+        notify(Notification.READY)
         listen(display, 6000)

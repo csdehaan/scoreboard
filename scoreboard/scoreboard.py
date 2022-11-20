@@ -54,7 +54,7 @@ class Scoreboard:
 
 
     def open_display(self):
-        self.display = Display('localhost', self.config.display.getint("port", 6000))
+        self.display = Display('127.0.0.1', self.config.display.getint("port", 6000))
 
 
     def update_clock(self):

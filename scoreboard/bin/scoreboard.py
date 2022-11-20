@@ -64,7 +64,7 @@ def main():
         config.read()
         gpio = GPIO(config)
     else:
-        from systemd.daemon import notify
+        # from systemd.daemon import notify
         config = Config()
         config.read()
         gpio = GPIO(config)
@@ -73,7 +73,7 @@ def main():
     gpio.set_online_switch_callback(switch_toggled)
 
 
-    display = Display('localhost', config.display.getint("port", 6000))
+    display = Display('127.0.0.1', config.display.getint("port", 6000))
 
 
     # start up the scoreboard in the correct mode
@@ -81,7 +81,7 @@ def main():
         try:
 
             if qt:
-                display.send(['mesg', 'Connecting ...'], 1, 8)
+                # display.send(['mesg', 'Connecting ...'], 1, 8)
                 print('Starting QT Mode')
 
                 # start the app
@@ -90,7 +90,7 @@ def main():
                 print('QT Mode Exited')
 
             elif gpio.online():
-                display.send(['mesg', 'Connecting ...'], 1, 20)
+                # display.send(['mesg', 'Connecting ...'], 1, 20)
                 print('Starting Online Mode')
 
                 # online mode
@@ -105,20 +105,20 @@ def main():
 
                 # start the app
                 process = subprocess.Popen(["sb_online"])
-                if not notified: notify("READY=1")
-                notified = True
+                # if not notified: notify("READY=1")
+                # notified = True
                 process.wait()
                 print('Online Mode Exited')
 
             else:
-                display.send(['ping'], 1, 20)
+                # display.send(['ping'], 1, 20)
                 print('Starting Offline Mode')
 
                 # offline mode
                 mode = 'offline'
                 process = subprocess.Popen(["sb_offline"])
-                if not notified: notify("READY=1")
-                notified = True
+                # if not notified: notify("READY=1")
+                # notified = True
                 process.wait()
                 print('Offline Mode Exited')
 

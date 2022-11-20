@@ -187,3 +187,13 @@ class Canvas:
             msg2 = f'{int(count/60):2}:{(int(count)%60):02}'
             [x,l] = [10,11] if (len(msg2) % 2 == 0) else [3,12]
             self.draw.text((x,18), msg2.center(l), font=self.time_font, fill=self.score_color)
+
+
+    def show_splash(self, msg):
+        self.clear()
+        self.image.paste(self.logo)
+
+        self.draw.text((75,7), "VB Scores", font=self.mesg_font, fill=self.mesg_color)
+
+        mesgx = 69 if len(msg) % 2 == 0 else 75
+        self.draw.text((mesgx,30), msg.center(9), font=self.mesg_font, fill=self.mesg_color)

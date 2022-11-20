@@ -7,7 +7,7 @@ from threading import Thread
 
 def listen(disp, port):
     display = disp
-    listener = Listener(('0.0.0.0', port), authkey=b'vbscores')
+    listener = Listener(('127.0.0.1', port), authkey=b'vbscores')
     running = True
     while running:
         conn = listener.accept()
@@ -56,6 +56,7 @@ def rgb_display(config_file=None):
     else:
         from scoreboard.display_led import Display
     display = Display(config)
+    display.show_splash("Starting")
 
     if config_file:
         from scoreboard.display_connection import Display as Connection
@@ -66,7 +67,7 @@ def rgb_display(config_file=None):
         display.run()
 
         print('Qt Display closed. Waiting for listen thread to exit.')
-        conn = Connection('localhost', config.display.getint("port", 6000))
+        conn = Connection('127.0.0.1', config.display.getint("port", 6000))
         conn.send(['shutdown'], 1, 1)
         listen_thread.join()
         print('Thread joined')
@@ -75,6 +76,6 @@ def rgb_display(config_file=None):
             if proc.name() == 'scoreboard': proc.terminate()
         print('exiting')
     else:
-        from systemd.daemon import notify
-        notify("READY=1")
+        # from systemd.daemon import notify
+        # notify("READY=1")
         listen(display, 6000)

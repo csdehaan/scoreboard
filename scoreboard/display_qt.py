@@ -97,3 +97,8 @@ class Display(Qt.QApplication):
     def show_timer(self, msg, count):
         self.canvas.show_timer(msg, count)
         self.update()
+
+
+    def show_splash(self, msg):
+        self.canvas.show_splash(msg)
+        self.update()

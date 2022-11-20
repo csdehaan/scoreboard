@@ -193,7 +193,6 @@ class Canvas:
         self.clear()
         self.image.paste(self.logo)
 
-        self.draw.text((75,7), "VB Scores", font=self.mesg_font, fill=self.mesg_color)
-
-        mesgx = 69 if len(msg) % 2 == 0 else 75
-        self.draw.text((mesgx,30), msg.center(9), font=self.mesg_font, fill=self.mesg_color)
+        self.draw.text((75,5), "VB Scores", font=self.court_font, fill=self.mesg_color)
+        mesgx = 60 if len(msg) % 2 == 0 else 64
+        self.draw_player_name(msg.center(15), 15, mesgx, 38, True)

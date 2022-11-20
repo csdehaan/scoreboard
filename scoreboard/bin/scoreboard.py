@@ -14,7 +14,6 @@ mode = None
 running = True
 mode_pin = 15
 gpio = None
-notified = False
 
 
 def switch_toggled(channel):
@@ -48,7 +47,6 @@ def main():
     global mode_pin
     global running
     global gpio
-    global notified
 
     if len(sys.argv) > 1:
         qt = True
@@ -64,7 +62,6 @@ def main():
         config.read()
         gpio = GPIO(config)
     else:
-        # from systemd.daemon import notify
         config = Config()
         config.read()
         gpio = GPIO(config)
@@ -81,7 +78,7 @@ def main():
         try:
 
             if qt:
-                # display.send(['mesg', 'Connecting ...'], 1, 8)
+                display.send(['splash', 'Connecting'], 1, 20)
                 print('Starting QT Mode')
 
                 # start the app
@@ -90,7 +87,7 @@ def main():
                 print('QT Mode Exited')
 
             elif gpio.online():
-                # display.send(['mesg', 'Connecting ...'], 1, 20)
+                display.send(['splash', 'Connecting'], 1, 80)
                 print('Starting Online Mode')
 
                 # online mode
@@ -105,20 +102,16 @@ def main():
 
                 # start the app
                 process = subprocess.Popen(["sb_online"])
-                # if not notified: notify("READY=1")
-                # notified = True
                 process.wait()
                 print('Online Mode Exited')
 
             else:
-                # display.send(['ping'], 1, 20)
+                display.send(['ping'], 1, 80)
                 print('Starting Offline Mode')
 
                 # offline mode
                 mode = 'offline'
                 process = subprocess.Popen(["sb_offline"])
-                # if not notified: notify("READY=1")
-                # notified = True
                 process.wait()
                 print('Offline Mode Exited')
 

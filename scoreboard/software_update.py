@@ -15,6 +15,7 @@ def software_update(force):
     config.read()
     update = False
     sw = None
+    display = Display('127.0.0.1', config.display.getint("port", 6000))
 
     api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 10))
     while sw == None:
@@ -24,6 +25,8 @@ def software_update(force):
             print(e)
             sleep(1)
 
+    display.send(['splash', 'Updating'], 1, 8)
+
     if force: update = True
     if sw['major_version'] != 0:
         if Version.major != sw['major_version']: update = True
@@ -32,7 +35,6 @@ def software_update(force):
 
 
     if update:
-        display = Display('127.0.0.1', config.display.getint("port", 6000))
         display.send(['mesg', 'Updating SW', f'{sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}', '', 'DO NOT TURN OFF'], 1, 8)
 
         api.logger.info(f'Updating Scoreboard Software from {Version.str()} to {sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}')

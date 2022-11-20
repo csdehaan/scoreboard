@@ -38,6 +38,9 @@ def listen(disp, port):
             if msg[0] == 'shutdown':
                 print('Shutting down display listener')
                 running = False
+            if msg[0] == 'splash':
+                display.show_splash(msg[1])
+                conn.send('ack')
         except Exception as e:
             print(f'Display Exception: [{type(e).__name__}] - {e}')
         finally:
@@ -76,6 +79,4 @@ def rgb_display(config_file=None):
             if proc.name() == 'scoreboard': proc.terminate()
         print('exiting')
     else:
-        # from systemd.daemon import notify
-        # notify("READY=1")
         listen(display, 6000)

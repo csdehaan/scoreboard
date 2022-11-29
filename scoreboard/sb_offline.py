@@ -133,6 +133,7 @@ def set_brightness():
             if brightness >= 0 and brightness <= 100:
                 scoreboard.config.display['brightness'] = str(brightness)
                 scoreboard.config.save()
+                scoreboard.restart_display()
     except:
         pass
 
@@ -146,8 +147,7 @@ def set_court():
         if court:
             court = int(court)
             if court > 0 and court < 1000:
-                scoreboard.config.scoreboard['court'] = str(court)
-                scoreboard.config.save()
+                scoreboard.set_court(court)
     except:
         pass
 
@@ -182,12 +182,12 @@ def set_next_delay():
         pass
 
 
-menu = [['Start Game',start_game], ['Show Status', show_status], ['Config WiFi',config_wifi], ['Set Brightness', set_brightness], ['Set Court Number', set_court], ['Set Match End Delay', set_end_delay], ['Set Next Match Delay', set_next_delay]]
+menu = [['Start Game',start_game], ['Show Status', show_status], ['Config WiFi',config_wifi], ['Brightness', set_brightness], ['Court Number', set_court], ['Match End Delay', set_end_delay], ['Next Match Delay', set_next_delay]]
 
 
 def menu_item(idx, sel):
-    if sel == idx: return '>'+menu[idx][0]
-    return ' '+menu[idx][0]
+    if sel == idx: return [menu[idx][0],(0,255,0)]
+    return menu[idx][0]
 
 
 def show_menu(idx):
@@ -222,7 +222,7 @@ def do_menu(idx=0):
         if key == 'down':
             if idx < len(menu) - 1: idx += 1
         if key == 'up':
-            if idx >= 0: idx -= 1
+            if idx > 0: idx -= 1
         if key == 'enter':
             menu[idx][1]()
             return

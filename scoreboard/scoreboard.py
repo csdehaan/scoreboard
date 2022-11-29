@@ -66,9 +66,9 @@ class Scoreboard:
 
 
     def message(self, line1, line2=None, line3=None, line4=None):
-        if line4: self.display.send(['mesg', line1, line2, line3, line4])
-        elif line3: self.display.send(['mesg', line1, line2, line3])
-        elif line2: self.display.send(['mesg', line1, line2])
+        if line4 != None: self.display.send(['mesg', line1, line2, line3, line4])
+        elif line3 != None: self.display.send(['mesg', line1, line2, line3])
+        elif line2 != None: self.display.send(['mesg', line1, line2])
         else: self.display.send(['mesg', line1])
 
 
@@ -78,6 +78,16 @@ class Scoreboard:
 
     def next_match(self, team1, team2, ref, countdown):
         self.display.send(['next_match', [team1, team2, ref], countdown])
+
+
+    def set_court(self, court):
+        self.config.scoreboard['court'] = str(court)
+        self.config.save()
+        self.display.send(['court', court])
+
+
+    def restart_display(self):
+        self.display.send(['shutdown'])
 
 
     def cpu_temperature(self):

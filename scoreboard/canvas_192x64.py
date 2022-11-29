@@ -149,29 +149,46 @@ class Canvas:
     def show_message(self, msg):
         self.clear()
         if len(msg) == 1:
-            [x,l] = [6,18] if (len(msg[0]) % 2 == 0) else [1,19]
-            self.draw.text((x,22), msg[0].center(l), font=self.mesg_font, fill=self.mesg_color)
+            text, color = self.get_msg_text(msg[0])
+            [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
+            self.draw.text((x,22), text.center(l), font=self.mesg_font, fill=color)
         if len(msg) == 2:
-            [x,l] = [6,18] if (len(msg[0]) % 2 == 0) else [1,19]
-            self.draw.text((x,10), msg[0].center(l), font=self.mesg_font, fill=self.mesg_color)
-            [x,l] = [6,18] if (len(msg[1]) % 2 == 0) else [1,19]
-            self.draw.text((x,32), msg[1].center(l), font=self.mesg_font, fill=self.mesg_color)
+            text, color = self.get_msg_text(msg[0])
+            [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
+            self.draw.text((x,10), text.center(l), font=self.mesg_font, fill=color)
+            text, color = self.get_msg_text(msg[1])
+            [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
+            self.draw.text((x,32), text.center(l), font=self.mesg_font, fill=color)
         if len(msg) == 3:
-            [x,l] = [6,18] if (len(msg[0]) % 2 == 0) else [1,19]
-            self.draw.text((x,3), msg[0].center(l), font=self.mesg_font, fill=self.mesg_color)
-            [x,l] = [6,18] if (len(msg[1]) % 2 == 0) else [1,19]
-            self.draw.text((x,23), msg[1].center(l), font=self.mesg_font, fill=self.mesg_color)
-            [x,l] = [6,18] if (len(msg[2]) % 2 == 0) else [1,19]
-            self.draw.text((x,43), msg[2].center(l), font=self.mesg_font, fill=self.mesg_color)
+            text, color = self.get_msg_text(msg[0])
+            [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
+            self.draw.text((x,3), text.center(l), font=self.mesg_font, fill=color)
+            text, color = self.get_msg_text(msg[1])
+            [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
+            self.draw.text((x,23), text.center(l), font=self.mesg_font, fill=color)
+            text, color = self.get_msg_text(msg[2])
+            [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
+            self.draw.text((x,43), text.center(l), font=self.mesg_font, fill=color)
         if len(msg) > 3:
-            [x,l] = [6,18] if (len(msg[0]) % 2 == 0) else [1,19]
-            self.draw.text((x,0), msg[0].center(l), font=self.mesg_font, fill=self.mesg_color)
-            [x,l] = [6,18] if (len(msg[1]) % 2 == 0) else [1,19]
-            self.draw.text((x,15), msg[1].center(l), font=self.mesg_font, fill=self.mesg_color)
-            [x,l] = [6,18] if (len(msg[2]) % 2 == 0) else [1,19]
-            self.draw.text((x,30), msg[2].center(l), font=self.mesg_font, fill=self.mesg_color)
-            [x,l] = [6,18] if (len(msg[3]) % 2 == 0) else [1,19]
-            self.draw.text((x,45), msg[3].center(l), font=self.mesg_font, fill=self.mesg_color)
+            text, color = self.get_msg_text(msg[0])
+            [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
+            self.draw.text((x,0), text.center(l), font=self.mesg_font, fill=color)
+            text, color = self.get_msg_text(msg[1])
+            [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
+            self.draw.text((x,15), text.center(l), font=self.mesg_font, fill=color)
+            text, color = self.get_msg_text(msg[2])
+            [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
+            self.draw.text((x,30), text.center(l), font=self.mesg_font, fill=color)
+            text, color = self.get_msg_text(msg[3])
+            [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
+            self.draw.text((x,45), text.center(l), font=self.mesg_font, fill=color)
+
+
+    def get_msg_text(self, msg):
+            if isinstance(msg, (list,tuple)):
+                return((msg[0],msg[1]))
+            else:
+                return((msg,self.mesg_color))
 
 
     def show_timer(self, msg, count):

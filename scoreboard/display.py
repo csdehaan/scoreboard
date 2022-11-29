@@ -41,6 +41,8 @@ def listen(disp, port):
             if msg[0] == 'splash':
                 display.show_splash(msg[1])
                 conn.send('ack')
+            if msg[0] == 'ping':
+                conn.send('ack')
         except Exception as e:
             print(f'Display Exception: [{type(e).__name__}] - {e}')
         finally:

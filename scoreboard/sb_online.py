@@ -381,7 +381,7 @@ def update_status(i):
     try:
         temperature = scoreboard.cpu_temperature()
         status["cpu_temperature"] = temperature
-        if temperature > 58:
+        if temperature > 70:
             api.logger.warning(f'CPU Temperature = {temperature}')
     except:
         pass

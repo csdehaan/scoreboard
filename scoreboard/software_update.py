@@ -35,7 +35,7 @@ def software_update(force):
 
 
     if update:
-        display.send(['mesg', 'Updating SW', f'{sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}', '', 'DO NOT TURN OFF'], 1, 8)
+        display.send(['mesg', 'Updating SW', f'{sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}', '', ['DO NOT TURN OFF',(255,0,0)]], 1, 8)
 
         api.logger.info(f'Updating Scoreboard Software from {Version.str()} to {sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}')
         print("Running software update")

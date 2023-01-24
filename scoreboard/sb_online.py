@@ -364,6 +364,8 @@ def get_next_match_teams():
                 return teams
 
     except Exception as e:
+        scoreboard.message('Connecting ...')
+        scoreboard.set_disconnected()
         api.logger.error(f'get_next_match_teams exception: {type(e).__name__} - {e}')
 
     return []

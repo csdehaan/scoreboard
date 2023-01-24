@@ -2,6 +2,7 @@
 from multiprocessing.connection import Listener
 from scoreboard import Config
 from threading import Thread
+from time import sleep
 
 
 
@@ -61,6 +62,7 @@ def rgb_display(config_file=None):
     else:
         from scoreboard.display_led import Display
     display = Display(config)
+    sleep(0.25)
     display.show_splash("Starting")
 
     if config_file:

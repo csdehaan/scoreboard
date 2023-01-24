@@ -33,7 +33,7 @@ class Match:
         self.team2_sets(js['games_team2'])
         self.team1_score(js['games'][-1]['team1_score'])
         self.team2_score(js['games'][-1]['team2_score'])
-        self.server(js['games'][-1]['server_number'])
+        self.info['server'] = js['games'][-1]['server_number']
         self.side_switch(js['games'][-1]['switch_sides?'])
         self.game_id = js['games'][-1]['id']
         self.match_id = js['id']
@@ -112,7 +112,22 @@ class Match:
     def server(self, server=None):
         if server == None:
             return self.info['server']
+        self.serve_order[0] = server
         self.info['server'] = server
+        try:
+            if server > 0 and self.serve_order[1] == 0:
+                team = int(server / 10)
+                other_team = 2 if team == 1 else 1
+                for i,v in enumerate(self.serve_order):
+                    print(f'{i} {v}')
+                    if v == 0 and i%2 == 0:
+                        self.serve_order[i] = team * 10
+                        print(f'  {self.serve_order}')
+                    if v == 0 and i%2 == 1:
+                        self.serve_order[i] = other_team * 10
+                        print(f'  {self.serve_order}')
+        except Exception as e:
+            print(e)
 
 
     def side_switch(self, switch=None):
@@ -129,14 +144,14 @@ class Match:
 
     def team1_add_point(self):
         self.info['team1_score'] += 1
-        if self.info['server'] in range(21,30):
+        if self.info['server'] in range(20,30):
             self.serve_order.rotate(-1)
             self.info['server'] = self.serve_order[0]
 
 
     def team2_add_point(self):
         self.info['team2_score'] += 1
-        if self.info['server'] in range(11,20):
+        if self.info['server'] in range(10,20):
             self.serve_order.rotate(-1)
             self.info['server'] = self.serve_order[0]
 

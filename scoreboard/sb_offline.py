@@ -19,6 +19,7 @@ def on_keypress(key):
         if key == keyboard.Key.enter: stdinput.append('enter')
         if key == keyboard.Key.esc: stdinput.append('esc')
         if key == keyboard.Key.backspace: stdinput.append('backspace')
+        if key == keyboard.Key.delete: stdinput.append('backspace')
         if key == keyboard.Key.down: stdinput.append('down')
         if key == keyboard.Key.up: stdinput.append('up')
 

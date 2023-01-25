@@ -76,7 +76,6 @@ def assign_server():
         server = team * 10 + player
         scoreboard.match.serve_order[0] = server
         scoreboard.match.server(server)
-        print(scoreboard.match.serve_order)
     except:
         pass
 
@@ -119,12 +118,8 @@ def start_game():
             update_score()
             while True:
                 key = get_key()
-                if key == '1':
-                    scoreboard.match.team1_add_point()
-                    print(scoreboard.match.serve_order)
-                if key == '2':
-                    scoreboard.match.team2_add_point()
-                    print(scoreboard.match.serve_order)
+                if key == '1': scoreboard.match.team1_add_point()
+                if key == '2': scoreboard.match.team2_add_point()
                 if key == '!': scoreboard.match.team1_subtract_point()
                 if key == '@': scoreboard.match.team2_subtract_point()
                 if key == 's': assign_server()

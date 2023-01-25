@@ -5,7 +5,6 @@ from collections import deque
 class Match:
     def __init__(self):
         self.info = {}
-        self.info['mode'] = 'score'
         self.info['t1_players'] = []
         self.info['t2_players'] = []
         self.info['referee'] = ''
@@ -115,19 +114,21 @@ class Match:
         self.serve_order[0] = server
         self.info['server'] = server
         try:
+            team = int(server / 10)
             if server > 0 and self.serve_order[1] == 0:
-                team = int(server / 10)
                 other_team = 2 if team == 1 else 1
                 for i,v in enumerate(self.serve_order):
-                    print(f'{i} {v}')
                     if v == 0 and i%2 == 0:
                         self.serve_order[i] = team * 10
-                        print(f'  {self.serve_order}')
                     if v == 0 and i%2 == 1:
                         self.serve_order[i] = other_team * 10
-                        print(f'  {self.serve_order}')
-        except Exception as e:
-            print(e)
+            if len(self.serve_order) == 4 and self.serve_order[2] == team * 10:
+                if server == 11: self.serve_order[2] = 12
+                if server == 12: self.serve_order[2] = 11
+                if server == 21: self.serve_order[2] = 22
+                if server == 22: self.serve_order[2] = 21
+        except:
+            pass
 
 
     def side_switch(self, switch=None):

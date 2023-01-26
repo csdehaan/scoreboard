@@ -1,5 +1,7 @@
 
 from time import sleep
+from datetime import datetime
+from datetime import timedelta
 from pynput import keyboard
 from collections import deque
 import threading
@@ -9,6 +11,9 @@ from scoreboard import Scoreboard
 
 scoreboard = Scoreboard()
 stdinput = deque()
+timer = None
+timer_running = False
+timer_count = 0
 
 
 def on_keypress(key):
@@ -24,10 +29,49 @@ def on_keypress(key):
         if key == keyboard.Key.up: stdinput.append('up')
 
 
-def update_clock():
-    global scoreboard
+def periodic_task(interval, times = 1000000000, cleanup = None):
+    def outer_wrap(function):
+        def wrap(*args, **kwargs):
+            stop = threading.Event()
+            def inner_wrap():
+                i = 0
+                delta = timedelta(seconds=interval)
+                start_time = datetime.now()
+                while i < times and not stop.isSet():
+                    function(i, *args, **kwargs)
+                    i += 1
+                    stop.wait((start_time + (delta * i) - datetime.now()).total_seconds())
 
-    threading.Timer(10, update_clock).start()
+                if cleanup:
+                    cleanup()
+
+            t = threading.Timer(0, inner_wrap)
+            t.daemon = True
+            t.start()
+            return stop
+        return wrap
+    return outer_wrap
+
+
+@periodic_task(1)
+def update_timer(i, msg, seconds):
+    global scoreboard
+    global timer
+    global timer_running
+    global timer_count
+
+    if timer_running:
+        if seconds > 0: timer_count -= 1
+        else: timer_count += 1
+    if timer_count < 0:
+        timer_running = False
+    else:
+        scoreboard.timer(msg, timer_count)
+
+
+@periodic_task(10)
+def update_clock(i):
+    global scoreboard
     scoreboard.update_clock()
 
 
@@ -124,9 +168,67 @@ def start_game():
                 if key == '@': scoreboard.match.team2_subtract_point()
                 if key == 's': assign_server()
                 if key == 'n': next_set()
-                if key == 'esc':
-                    return
+                if key == 'esc': return
                 update_score()
+
+
+def stopwatch():
+    global scoreboard
+    global timer
+    global timer_running
+    global timer_count
+
+    try:
+        scoreboard.set_mode_menu()
+        if timer: timer.set()
+        timer_running = False
+        timer_count = 0
+        timer = update_timer('', -1)
+        while True:
+            key = get_key()
+            if key == 'r':
+                timer_count = 0
+            if key == 'enter':
+                timer_running = not timer_running
+            if key == 'esc':
+                if timer: timer.set()
+                timer = None
+                return
+    except:
+        if timer: timer.set()
+        timer = None
+
+
+def countdown_timer():
+    global scoreboard
+    global timer
+    global timer_running
+    global timer_count
+
+    try:
+        scoreboard.set_mode_menu()
+        if timer: timer.set()
+        timer_running = False
+        countdown = get_input('Countdown Time:')
+        min_sec = countdown.split(':', 1)
+        if len(min_sec) == 1: timer_count = int(min_sec[0])
+        else: timer_count = int(min_sec[0]) * 60 + int(min_sec[1])
+        timer = update_timer('', timer_count)
+        while True:
+            key = get_key()
+            if key == 'r':
+                if len(min_sec) == 1: timer_count = int(min_sec[0])
+                else: timer_count = int(min_sec[0]) * 60 + int(min_sec[1])
+            if key == 'enter':
+                timer_running = not timer_running
+            if key == 'esc':
+                if timer: timer.set()
+                timer = None
+                return
+    except:
+        if timer: timer.set()
+        timer = None
+
 
 
 def show_status():
@@ -134,7 +236,7 @@ def show_status():
     while True:
         cpu = 'UNK'
         try:
-            cpu = scoreboard.cpu_temperature()
+            cpu = round(scoreboard.cpu_temperature(), 1)
         except:
             pass
         wifi = 'UNK'
@@ -222,7 +324,7 @@ def set_next_delay():
         pass
 
 
-menu = [['Start Match',start_game], ['Show Status', show_status], ['Config WiFi',config_wifi], ['Brightness', set_brightness], ['Court Number', set_court], ['Match End Delay', set_end_delay], ['Next Match Delay', set_next_delay]]
+menu = [['Start Match',start_game], ['Stopwatch',stopwatch], ['Timer',countdown_timer], ['Show Status', show_status], ['Config WiFi',config_wifi], ['Brightness', set_brightness], ['Court Number', set_court], ['Match End Delay', set_end_delay], ['Next Match Delay', set_next_delay]]
 
 
 def menu_item(idx, sel):
@@ -282,10 +384,12 @@ def sb_offline(configfile=None):
 
     while True:
         key = get_key()
-        if key == 'w': config_wifi()
         if key == 'm': start_game()
-        if key == 'down': do_menu()
+        if key == 's': stopwatch()
+        if key == 't': countdown_timer()
+        if key == 'w': config_wifi()
         if key == 'up': do_menu()
+        if key == 'down': do_menu()
         scoreboard.set_mode_clock()
         scoreboard.update_clock()
 

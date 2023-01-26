@@ -122,7 +122,7 @@ class Match:
                         self.serve_order[i] = team * 10
                     if v == 0 and i%2 == 1:
                         self.serve_order[i] = other_team * 10
-            if len(self.serve_order) == 4 and self.serve_order[2] == team * 10:
+            if len(self.serve_order) == 4:
                 if server == 11: self.serve_order[2] = 12
                 if server == 12: self.serve_order[2] = 11
                 if server == 21: self.serve_order[2] = 22

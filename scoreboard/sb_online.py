@@ -122,7 +122,7 @@ def update_next_match(i):
                 scoreboard.set_mode_score()
             elif len(next_match) > 0:
                 scoreboard.next_match(next_match[0], next_match[1], next_match[2], countdown)
-            else:
+            elif scoreboard.is_connected():
                 countdown = 0
                 scoreboard.set_mode_clock()
                 scoreboard.update_clock()

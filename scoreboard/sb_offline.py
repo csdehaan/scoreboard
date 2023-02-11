@@ -272,10 +272,8 @@ def set_brightness():
         brightness = get_input('Brightness:')
         if brightness:
             brightness = int(brightness)
-            if brightness >= 0 and brightness <= 100:
-                scoreboard.config.display['brightness'] = str(brightness)
-                scoreboard.config.save()
-                scoreboard.restart_display()
+            if brightness >= 0 and brightness <= 200:
+                scoreboard.set_brightness(brightness)
     except:
         pass
 
@@ -328,16 +326,19 @@ menu = [['Start Match',start_game], ['Stopwatch',stopwatch], ['Timer',countdown_
 
 
 def menu_item(idx, sel):
+    global menu
     if sel == idx: return [menu[idx][0],(0,255,0)]
     return menu[idx][0]
 
 
 def show_menu(idx):
     global scoreboard
+    global menu
     scoreboard.set_mode_menu()
+    max = len(menu)
     r1 = range(0,2)
-    r2 = range(2,4)
-    r3 = range(4,7)
+    r2 = range(2,max-3)
+    r3 = range(max-3,max)
     m = []
     if idx in r1:
         m.append(menu_item(0, idx))

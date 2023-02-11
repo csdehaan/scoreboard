@@ -86,6 +86,20 @@ class Scoreboard:
         self.display.send(['court', court])
 
 
+    def set_brightness(self, brightness):
+        extra_brightness = 0
+        if brightness > 100:
+            extra_brightness = brightness - 100
+            brightness = 100
+        pwm_lsb_nanoseconds = 300 + (extra_brightness * 10)
+        pwm_bits = 11 - int(extra_brightness / 10)
+        self.config.display['brightness'] = str(brightness)
+        self.config.display['pwm_lsb_nanoseconds'] = str(pwm_lsb_nanoseconds)
+        self.config.display['pwm_bits'] = str(pwm_bits)
+        self.config.save()
+        self.restart_display()
+
+
     def restart_display(self):
         self.display.send(['shutdown'])
 

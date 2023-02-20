@@ -239,6 +239,7 @@ def rx_config_update(message):
     global timeout
     global timer
     global workout
+    global scoreboard
 
     api.logger.debug(f'rx_config_update: message={message}')
 
@@ -281,6 +282,9 @@ def rx_config_update(message):
                 else: workout.finish_set()
             if cmd == 'back':
                 workout.previous_set()
+        cmd = m.get('brightness')
+        if cmd:
+            scoreboard.set_brightness(cmd)
 
 
     except Exception as e:

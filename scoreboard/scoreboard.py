@@ -87,6 +87,9 @@ class Scoreboard:
 
 
     def set_brightness(self, brightness):
+        brightness = int(brightness)
+        if brightness > 200: brightness = 200
+        if brightness < 0: brightness = 0
         extra_brightness = 0
         if brightness > 100:
             extra_brightness = brightness - 100

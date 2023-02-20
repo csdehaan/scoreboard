@@ -6,6 +6,7 @@ from pynput import keyboard
 from collections import deque
 import threading
 import re
+import evdev
 
 from scoreboard import Scoreboard
 
@@ -27,6 +28,26 @@ def on_keypress(key):
         if key == keyboard.Key.delete: stdinput.append('backspace')
         if key == keyboard.Key.down: stdinput.append('down')
         if key == keyboard.Key.up: stdinput.append('up')
+
+def select_device(paths):
+    dev, count = None, 0
+    for path in paths:
+        try:
+            next_dev = evdev.InputDevice(path)
+        except OSError:
+            continue
+
+        # Does this device provide more handled event codes?
+        capabilities = next_dev.capabilities()
+        cap = capabilities[1]
+        next_count = len(cap)
+        if next_count > count and 30 in cap and 48 in cap:
+            dev = path
+            count = next_count
+        next_dev.close()
+
+    return dev
+
 
 
 def periodic_task(interval, times = 1000000000, cleanup = None):
@@ -270,10 +291,7 @@ def set_brightness():
     try:
         scoreboard.set_mode_menu()
         brightness = get_input('Brightness:')
-        if brightness:
-            brightness = int(brightness)
-            if brightness >= 0 and brightness <= 200:
-                scoreboard.set_brightness(brightness)
+        if brightness: scoreboard.set_brightness(brightness)
     except:
         pass
 
@@ -380,7 +398,8 @@ def sb_offline(configfile=None):
     scoreboard.open_display()
     update_clock()
 
-    listener = keyboard.Listener(on_press=on_keypress)
+    dev = select_device(evdev.list_devices())
+    listener = keyboard.Listener(on_press=on_keypress, device_paths=[dev])
     listener.start()
 
     while True:

@@ -399,7 +399,7 @@ def sb_offline(configfile=None):
     update_clock()
 
     dev = select_device(evdev.list_devices())
-    listener = keyboard.Listener(on_press=on_keypress, device_paths=[dev])
+    listener = keyboard.Listener(on_press=on_keypress, uinput_device_paths=[dev])
     listener.start()
 
     while True:

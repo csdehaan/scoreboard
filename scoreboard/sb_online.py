@@ -224,8 +224,10 @@ def rx_score_update(message):
         scoreboard.match.from_json(m)
         if m['state'] == 'in_progress':
             scoreboard.set_mode_score()
-            if scoreboard.match.side_switch(): side_switch()
             update_score()
+            if scoreboard.match.side_switch():
+                sleep(1)
+                side_switch()
         elif m['state'] == 'complete':
             update_score()
             next_match_in(scoreboard.config.scoreboard.getint('end_match_delay', 60))

@@ -13,16 +13,18 @@ class Display:
         options.parallel = config.display.getint("parallel", 1)
         options.row_address_type = config.display.getint("row_address_type", 0)
         options.multiplexing = config.display.getint("multiplexing", 0)
-        options.pwm_bits = config.display.getint("pwm_bits", 11)
+        options.pwm_bits = config.display.getint("pwm_bits", 8)
         options.brightness = config.display.getint("brightness", 100)
-        options.pwm_lsb_nanoseconds = config.display.getint("pwm_lsb_nanoseconds", 130)
+        options.pwm_lsb_nanoseconds = config.display.getint("pwm_lsb_nanoseconds", 300)
         options.led_rgb_sequence = config.display.get("led_rgb_sequence", "RGB")
         options.gpio_slowdown = config.display.getint("gpio_slowdown", 1)
         options.limit_refresh_rate_hz = config.display.getint("limit_refresh", 0)
         self.matrix = RGBMatrix(options = options)
         self.frame_canvas = self.matrix.CreateFrameCanvas()
 
-        if config.display.getint("cols") * config.display.getint("chain_length", 1) == 192:
+        if config.display.getint("cols") * config.display.getint("chain_length", 1) == 256:
+            from scoreboard.canvas_256x96 import Canvas
+        elif config.display.getint("cols") * config.display.getint("chain_length", 1) == 192:
             from scoreboard.canvas_192x64 import Canvas
         else:
             from scoreboard.canvas_96x32 import Canvas

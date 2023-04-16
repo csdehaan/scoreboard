@@ -1,12 +1,13 @@
 
 from PyQt5 import Qt
 
+LED_SIZE=8
 
 class RgbLed(Qt.QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setMinimumSize(10,10)
+        self.setMinimumSize(5,5)
         self.setMaximumSize(300,300)
         self.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
         self.off()
@@ -40,7 +41,7 @@ class Display(Qt.QApplication):
         self.rows = config.display.getint("rows", 64)
         self.cols = config.display.getint("cols", 192)
         self.win = Qt.QMainWindow()
-        self.win.resize(self.cols*10, self.rows*10)
+        self.win.resize(self.cols*LED_SIZE, self.rows*LED_SIZE)
         self.win.move(config.display.getint("window_x", 100), config.display.getint("window_y", 100))
         self.win.setStyleSheet('background-color: black;')
         self.win.setAutoFillBackground( True )
@@ -51,10 +52,12 @@ class Display(Qt.QApplication):
             self.leds.append([])
             for col in range(self.cols):
                 self.leds[row].append(RgbLed(self.win))
-                self.leds[row][col].setSize(10)
-                self.leds[row][col].move(col*10, row*10)
+                self.leds[row][col].setSize(LED_SIZE)
+                self.leds[row][col].move(col*LED_SIZE, row*LED_SIZE)
 
-        if self.cols == 192:
+        if self.cols == 256:
+            from scoreboard.canvas_256x96 import Canvas
+        elif self.cols == 192:
             from scoreboard.canvas_192x64 import Canvas
         else:
             from scoreboard.canvas_96x32 import Canvas

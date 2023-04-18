@@ -398,9 +398,11 @@ def sb_offline(configfile=None):
     scoreboard.open_display()
     update_clock()
 
+    listener = None
     dev = select_device(evdev.list_devices())
-    listener = keyboard.Listener(on_press=on_keypress, uinput_device_paths=[dev])
-    listener.start()
+    if dev:
+        listener = keyboard.Listener(on_press=on_keypress, uinput_device_paths=[dev])
+        listener.start()
 
     while True:
         key = get_key()

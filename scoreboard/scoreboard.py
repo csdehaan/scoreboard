@@ -123,4 +123,4 @@ class Scoreboard:
 
     def volume(self):
         rc = subprocess.run(['mpc', 'volume'], capture_output=True)
-        return int(re.search('volume: (-\d\d?)%', str(rc.stdout)).groups()[0])
+        return int(re.search('volume: (\d\d?)%', str(rc.stdout)).groups()[0])

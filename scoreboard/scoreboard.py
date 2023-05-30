@@ -119,3 +119,8 @@ class Scoreboard:
         if signal > -21: return 100
         if signal < -92: return 1
         return wifi_sig[signal+20]
+
+
+    def volume(self):
+        rc = subprocess.run(['mpc', 'volume'], capture_output=True)
+        return int(re.search('volume: (-\d\d?)%', str(rc.stdout)).groups()[0])

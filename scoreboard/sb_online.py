@@ -167,7 +167,7 @@ def update_timeout(i, name, length=60):
     else:
         msg = str(count)
     scoreboard.message(name, 'TIMEOUT', msg)
-    if count <= 0: timeout.set()
+    if count <= 0 and timeout: timeout.set()
 
 
 def side_switch_clear():
@@ -252,7 +252,7 @@ def rx_config_update(message):
             rc = subprocess.run(cmd.split(' '), capture_output=True)
             api.logger.info(rc)
         cmd = m.get('start_timeout')
-        if cmd:
+        if cmd and timeout == None:
             if cmd == 'MEDICAL': timeout = update_timeout(cmd, 300)
             else: timeout = update_timeout(cmd)
         cmd = m.get('end_timeout')
@@ -287,6 +287,10 @@ def rx_config_update(message):
         cmd = m.get('brightness')
         if cmd:
             scoreboard.set_brightness(cmd)
+        cmd = m.get('set_mode')
+        if cmd:
+            scoreboard.mode = cmd
+            scoreboard.update_clock()
 
 
     except Exception as e:
@@ -412,6 +416,11 @@ def update_status(i):
 
     try:
         status["wifi"] = scoreboard.wifi_signal()
+    except:
+        pass
+
+    try:
+        status["vol"] = scoreboard.volume()
     except:
         pass
 

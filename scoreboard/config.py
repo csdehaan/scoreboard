@@ -46,3 +46,11 @@ class Config:
         d['display'] = dict(self.display)
         d['wifi'] = dict(self.wifi)
         return dumps(d)
+
+
+    def screen_rows(self):
+        return self.display.getint("rows") * self.display.getint("parallel", 1)
+
+
+    def screen_cols(self):
+        return self.display.getint("cols") * self.display.getint("chain_length", 1)

@@ -1,6 +1,7 @@
 
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
-from scoreboard.gpio import GPIO
+from .gpio import GPIO
+from .splash_screen import SplashScreen
 
 class Display:
 
@@ -22,51 +23,20 @@ class Display:
         self.matrix = RGBMatrix(options = options)
         self.frame_canvas = self.matrix.CreateFrameCanvas()
 
-        if config.display.getint("cols") * config.display.getint("chain_length", 1) == 256:
-            from scoreboard.canvas_256x96 import Canvas
-        elif config.display.getint("cols") * config.display.getint("chain_length", 1) == 192:
-            from scoreboard.canvas_192x64 import Canvas
-        else:
-            from scoreboard.canvas_96x32 import Canvas
-        self.canvas = Canvas(config)
-
         gpio = GPIO(config)
         gpio.setup_display()
         gpio.enable_display()
 
+        self.splash = SplashScreen('splash', config)
+        self.show_splash("Starting")
 
-    def update(self):
+
+    def show(self, image):
         self.frame_canvas.Clear()
-        self.frame_canvas.SetImage(self.canvas.image)
+        self.frame_canvas.SetImage(image)
         self.frame_canvas = self.matrix.SwapOnVSync(self.frame_canvas)
 
 
-    def update_clock(self):
-        self.canvas.update_clock()
-        self.update()
-
-
-
-    def update_match(self, match):
-        self.canvas.update_match(match)
-        self.update()
-
-
-    def update_next_match(self, teams, countdown=-1):
-        self.canvas.update_next_match(teams, countdown)
-        self.update()
-
-
-    def show_message(self, msg):
-        self.canvas.show_message(msg)
-        self.update()
-
-
-    def show_timer(self, msg, count):
-        self.canvas.show_timer(msg, count)
-        self.update()
-
-
     def show_splash(self, msg):
-        self.canvas.show_splash(msg)
-        self.update()
+        self.splash.draw(msg)
+        self.show(self.splash.image)

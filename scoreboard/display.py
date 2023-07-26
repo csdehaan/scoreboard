@@ -2,8 +2,7 @@
 from multiprocessing.connection import Listener
 from scoreboard import Config
 from threading import Thread
-from time import sleep
-
+from PIL import Image
 
 
 def listen(disp, port):
@@ -15,35 +14,19 @@ def listen(disp, port):
 
         try:
             msg = conn.recv()
-            if msg[0] == 'clock':
-                display.update_clock()
+            if isinstance(msg, Image.Image):
+                display.show(msg)
                 conn.send('ack')
-            if msg[0] == 'match':
-                display.update_match(msg[1])
-                conn.send('ack')
-            if msg[0] == 'next_match':
-                display.update_next_match(msg[1], msg[2])
-                conn.send('ack')
-            if msg[0] == 'timer':
-                display.show_timer(msg[1], msg[2])
-                conn.send('ack')
-            if msg[0] == 'court':
-                display.canvas.court = msg[1]
-                conn.send('ack')
-            if msg[0] == 'logo':
-                display.canvas.load_logo(msg[1])
-                conn.send('ack')
-            if msg[0] == 'mesg':
-                display.show_message(msg[1:5])
-                conn.send('ack')
-            if msg[0] == 'shutdown':
+            elif msg[0] == 'shutdown':
                 print('Shutting down display listener')
                 running = False
-            if msg[0] == 'splash':
+            elif msg[0] == 'splash':
                 display.show_splash(msg[1])
                 conn.send('ack')
-            if msg[0] == 'ping':
+            elif msg[0] == 'ping':
                 conn.send('ack')
+            else:
+                conn.send('nack')
         except Exception as e:
             print(f'Display Exception: [{type(e).__name__}] - {e}')
         finally:
@@ -62,8 +45,6 @@ def rgb_display(config_file=None):
     else:
         from scoreboard.display_led import Display
     display = Display(config)
-    sleep(0.25)
-    display.show_splash("Starting")
 
     if config_file:
         from scoreboard.display_connection import Display as Connection

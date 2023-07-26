@@ -60,6 +60,7 @@ class GPIO:
 
 
     def setup_display(self):
+        global rpi
         if rpi and self.display_enable_pin:
             if self.display_enable_pin: RPI_GPIO.setup(self.display_enable_pin, RPI_GPIO.OUT)
 

@@ -1,20 +1,15 @@
 
 from time import sleep
-from datetime import datetime
-from datetime import timedelta
 from pynput import keyboard
 from collections import deque
-import threading
 import re
 import evdev
 
 from scoreboard import Scoreboard
+from .match import Match
 
 scoreboard = Scoreboard()
 stdinput = deque()
-timer = None
-timer_running = False
-timer_count = 0
 
 
 def on_keypress(key):
@@ -28,6 +23,7 @@ def on_keypress(key):
         if key == keyboard.Key.delete: stdinput.append('backspace')
         if key == keyboard.Key.down: stdinput.append('down')
         if key == keyboard.Key.up: stdinput.append('up')
+
 
 def select_device(paths):
     dev, count = None, 0
@@ -47,58 +43,6 @@ def select_device(paths):
         next_dev.close()
 
     return dev
-
-
-
-def periodic_task(interval, times = 1000000000, cleanup = None):
-    def outer_wrap(function):
-        def wrap(*args, **kwargs):
-            stop = threading.Event()
-            def inner_wrap():
-                i = 0
-                delta = timedelta(seconds=interval)
-                start_time = datetime.now()
-                while i < times and not stop.isSet():
-                    function(i, *args, **kwargs)
-                    i += 1
-                    stop.wait((start_time + (delta * i) - datetime.now()).total_seconds())
-
-                if cleanup:
-                    cleanup()
-
-            t = threading.Timer(0, inner_wrap)
-            t.daemon = True
-            t.start()
-            return stop
-        return wrap
-    return outer_wrap
-
-
-@periodic_task(1)
-def update_timer(i, msg, seconds):
-    global scoreboard
-    global timer
-    global timer_running
-    global timer_count
-
-    if timer_running:
-        if seconds > 0: timer_count -= 1
-        else: timer_count += 1
-    if timer_count < 0:
-        timer_running = False
-    else:
-        scoreboard.timer(msg, timer_count)
-
-
-@periodic_task(10)
-def update_clock(i):
-    global scoreboard
-    scoreboard.update_clock()
-
-
-def update_score():
-    global scoreboard
-    scoreboard.update_score()
 
 
 def get_key(filter=None):
@@ -123,7 +67,7 @@ def get_input(prompt, accept_key = 'enter', cancel_key = 'esc'):
     stdinput.clear()
     input = ''
     while True:
-        scoreboard.message(prompt, input)
+        scoreboard.show_menu([prompt, input])
         key = get_key(f'\S|{accept_key}|{cancel_key}|backspace')
         if key == accept_key: return input
         if key == cancel_key: return None
@@ -131,37 +75,35 @@ def get_input(prompt, accept_key = 'enter', cancel_key = 'esc'):
         else: input += key
 
 
-def assign_server():
-    global scoreboard
+def assign_server(match):
     try:
         team = int(get_key())
         if team != 1 and team != 2: return
         player = int(get_key())
         if player < 1 or player > 4: return
         server = team * 10 + player
-        scoreboard.match.serve_order[0] = server
-        scoreboard.match.server(server)
+        match.serve_order[0] = server
+        match.server(server)
     except:
         pass
 
 
-def next_set():
-    global scoreboard
+def next_set(match):
     try:
-        if scoreboard.match.team1_score() > scoreboard.match.team2_score():
-            scoreboard.match.team1_sets(scoreboard.match.team1_sets() + 1)
-            if scoreboard.match.team1_sets() < 2:
-                scoreboard.match.team1_score(0)
-                scoreboard.match.team2_score(0)
-                scoreboard.match.serving_order(sum(list(map(lambda x: [0,0], range(11,11+len(scoreboard.match.info['t1_players'])))), []))
-                scoreboard.match.server(0)
+        if match.team1_score() > match.team2_score():
+            match.team1_sets(match.team1_sets() + 1)
+            if match.team1_sets() < 2:
+                match.team1_score(0)
+                match.team2_score(0)
+                match.serving_order(sum(list(map(lambda x: [0,0], range(11,11+len(match.info['t1_players'])))), []))
+                match.server(0)
         else:
-            scoreboard.match.team2_sets(scoreboard.match.team2_sets() + 1)
-            if scoreboard.match.team2_sets() < 2:
-                scoreboard.match.team1_score(0)
-                scoreboard.match.team2_score(0)
-                scoreboard.match.serving_order(sum(list(map(lambda x: [0,0], range(11,11+len(scoreboard.match.info['t1_players'])))), []))
-                scoreboard.match.server(0)
+            match.team2_sets(match.team2_sets() + 1)
+            if match.team2_sets() < 2:
+                match.team1_score(0)
+                match.team2_score(0)
+                match.serving_order(sum(list(map(lambda x: [0,0], range(11,11+len(match.info['t1_players'])))), []))
+                match.server(0)
     except:
         pass
 
@@ -169,86 +111,67 @@ def next_set():
 def start_game():
     global scoreboard
 
-    scoreboard.set_mode_menu()
+    match = Match()
     t1 = get_input('Team 1 Name:')
     if t1:
         t2 = get_input('Team 2 Name:')
         if t2:
-            scoreboard.match.reset()
-            scoreboard.match.team1(t1)
-            scoreboard.match.team2(t2)
-            scoreboard.match.serving_order(sum(list(map(lambda x: [0,0], range(11,11+len(scoreboard.match.info['t1_players'])))), []))
-            scoreboard.match.server(0)
-            scoreboard.set_mode_score()
-            update_score()
+            match.reset()
+            match.team1(t1)
+            match.team2(t2)
+            match.serving_order(sum(list(map(lambda x: [0,0], range(11,11+len(match.info['t1_players'])))), []))
+            match.server(0)
+            scoreboard.show_score(match)
             while True:
                 key = get_key()
-                if key == '1': scoreboard.match.team1_add_point()
-                if key == '2': scoreboard.match.team2_add_point()
-                if key == '!': scoreboard.match.team1_subtract_point()
-                if key == '@': scoreboard.match.team2_subtract_point()
-                if key == 's': assign_server()
-                if key == 'n': next_set()
+                if key == '1': match.team1_add_point()
+                if key == '2': match.team2_add_point()
+                if key == '!': match.team1_subtract_point()
+                if key == '@': match.team2_subtract_point()
+                if key == 's': assign_server(match)
+                if key == 'n': next_set(match)
                 if key == 'esc': return
-                update_score()
+                scoreboard.show_score(match)
 
 
 def stopwatch():
     global scoreboard
-    global timer
-    global timer_running
-    global timer_count
 
     try:
-        scoreboard.set_mode_menu()
-        if timer: timer.set()
-        timer_running = False
-        timer_count = 0
-        timer = update_timer('', -1)
+        scoreboard.show_timer('', -1)
         while True:
             key = get_key()
             if key == 'r':
-                timer_count = 0
+                scoreboard.reset_timer()
             if key == 'enter':
-                timer_running = not timer_running
+                scoreboard.pause_timer()
             if key == 'esc':
-                if timer: timer.set()
-                timer = None
+                scoreboard.hide_timer()
                 return
     except:
-        if timer: timer.set()
-        timer = None
+        pass
 
 
 def countdown_timer():
     global scoreboard
-    global timer
-    global timer_running
-    global timer_count
 
     try:
-        scoreboard.set_mode_menu()
-        if timer: timer.set()
-        timer_running = False
         countdown = get_input('Countdown Time:')
         min_sec = countdown.split(':', 1)
         if len(min_sec) == 1: timer_count = int(min_sec[0])
         else: timer_count = int(min_sec[0]) * 60 + int(min_sec[1])
-        timer = update_timer('', timer_count)
+        scoreboard.show_timer('', timer_count)
         while True:
             key = get_key()
             if key == 'r':
-                if len(min_sec) == 1: timer_count = int(min_sec[0])
-                else: timer_count = int(min_sec[0]) * 60 + int(min_sec[1])
+                scoreboard.reset_timer()
             if key == 'enter':
-                timer_running = not timer_running
+                scoreboard.pause_timer()
             if key == 'esc':
-                if timer: timer.set()
-                timer = None
+                scoreboard.hide_timer()
                 return
     except:
-        if timer: timer.set()
-        timer = None
+        pass
 
 
 
@@ -265,7 +188,7 @@ def show_status():
             wifi = scoreboard.wifi_signal()
         except:
             pass
-        scoreboard.message('STATUS:', '', f'CPU Temp = {cpu}', f'WiFi Signal = {wifi}')
+        scoreboard.show_menu(['STATUS:', '', f'CPU Temp = {cpu}', f'WiFi Signal = {wifi}'])
         if len(stdinput) > 0:
             key = stdinput.popleft()
             if key == 'esc': return
@@ -275,7 +198,6 @@ def show_status():
 def config_wifi():
     global scoreboard
 
-    scoreboard.set_mode_menu()
     ssid = get_input('Enter WiFi SSID:')
     if ssid:
         pw = get_input('Enter Password:')
@@ -289,7 +211,6 @@ def set_brightness():
     global scoreboard
 
     try:
-        scoreboard.set_mode_menu()
         brightness = get_input('Brightness:')
         if brightness: scoreboard.set_brightness(brightness)
     except:
@@ -300,7 +221,6 @@ def set_court():
     global scoreboard
 
     try:
-        scoreboard.set_mode_menu()
         court = get_input('Court:')
         if court:
             court = int(court)
@@ -314,7 +234,6 @@ def set_end_delay():
     global scoreboard
 
     try:
-        scoreboard.set_mode_menu()
         delay = get_input('Match End Delay:')
         if delay:
             delay = int(delay)
@@ -329,7 +248,6 @@ def set_next_delay():
     global scoreboard
 
     try:
-        scoreboard.set_mode_menu()
         delay = get_input('Next Match Delay:')
         if delay:
             delay = int(delay)
@@ -352,7 +270,6 @@ def menu_item(idx, sel):
 def show_menu(idx):
     global scoreboard
     global menu
-    scoreboard.set_mode_menu()
     max = len(menu)
     r1 = range(0,2)
     r2 = range(2,max-3)
@@ -373,7 +290,7 @@ def show_menu(idx):
         m.append(menu_item(len(menu)-3, idx))
         m.append(menu_item(len(menu)-2, idx))
         m.append(menu_item(len(menu)-1, idx))
-    scoreboard.message(m[0], m[1], m[2], m[3])
+    scoreboard.show_menu([m[0], m[1], m[2], m[3]])
 
 
 def do_menu(idx=0):
@@ -395,8 +312,7 @@ def sb_offline(configfile=None):
     global scoreboard
 
     scoreboard.set_config(configfile)
-    scoreboard.open_display()
-    update_clock()
+    scoreboard.init_display_stack()
 
     listener = None
     dev = select_device(evdev.list_devices())
@@ -412,8 +328,7 @@ def sb_offline(configfile=None):
         if key == 'w': config_wifi()
         if key == 'up': do_menu()
         if key == 'down': do_menu()
-        scoreboard.set_mode_clock()
-        scoreboard.update_clock()
+        scoreboard.clear_screen()
 
 
 if __name__ == "__main__":

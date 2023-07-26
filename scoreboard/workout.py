@@ -33,6 +33,10 @@ class Workout:
         self.next_exercise()
 
 
+    def stop(self):
+        self.exercise_idx = None
+
+
     def pause(self):
         self.paused = not self.paused
 

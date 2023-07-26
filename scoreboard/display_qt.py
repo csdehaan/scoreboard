@@ -1,5 +1,6 @@
 
 from PyQt5 import Qt
+from .splash_screen import SplashScreen
 
 LED_SIZE=8
 
@@ -38,8 +39,8 @@ class Display(Qt.QApplication):
 
     def __init__(self, config):
         super().__init__([])
-        self.rows = config.display.getint("rows", 64)
-        self.cols = config.display.getint("cols", 192)
+        self.rows = config.screen_rows()
+        self.cols = config.screen_cols()
         self.win = Qt.QMainWindow()
         self.win.resize(self.cols*LED_SIZE, self.rows*LED_SIZE)
         self.win.move(config.display.getint("window_x", 100), config.display.getint("window_y", 100))
@@ -55,13 +56,8 @@ class Display(Qt.QApplication):
                 self.leds[row][col].setSize(LED_SIZE)
                 self.leds[row][col].move(col*LED_SIZE, row*LED_SIZE)
 
-        if self.cols == 256:
-            from scoreboard.canvas_256x96 import Canvas
-        elif self.cols == 192:
-            from scoreboard.canvas_192x64 import Canvas
-        else:
-            from scoreboard.canvas_96x32 import Canvas
-        self.canvas = Canvas(config)
+        self.splash = SplashScreen('splash', config)
+        self.show_splash("Starting")
 
 
     def run(self):
@@ -69,39 +65,13 @@ class Display(Qt.QApplication):
         self.exec_()
 
 
-    def update(self):
+    def show(self, image):
         for row in range(self.rows):
             for col in range(self.cols):
-                pixel = self.canvas.image.getpixel((col,row))
+                pixel = image.getpixel((col,row))
                 self.leds[row][col].on(Qt.QColor(pixel[0], pixel[1], pixel[2]))
 
 
-    def update_clock(self):
-        self.canvas.update_clock()
-        self.update()
-
-
-
-    def update_match(self, match):
-        self.canvas.update_match(match)
-        self.update()
-
-
-    def update_next_match(self, teams, countdown=-1):
-        self.canvas.update_next_match(teams, countdown)
-        self.update()
-
-
-    def show_message(self, msg):
-        self.canvas.show_message(msg)
-        self.update()
-
-
-    def show_timer(self, msg, count):
-        self.canvas.show_timer(msg, count)
-        self.update()
-
-
     def show_splash(self, msg):
-        self.canvas.show_splash(msg)
-        self.update()
+        self.splash.draw(msg)
+        self.show(self.splash.image)

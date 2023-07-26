@@ -15,7 +15,7 @@ class Api:
     def __init__(self, api_key, log_level, actioncable_error=None):
         self.api_key = api_key
         self.score_subscription = None
-        self.config_subscription = None
+        self.command_subscription = None
         self.connection = Connection(url=f'{WS}://{SERVER}/cable', on_error=actioncable_error)
         self.connection.connect()
         self.logger = logger.getLogger('scoreboard', int(log_level), api_key)
@@ -30,13 +30,13 @@ class Api:
         self.score_subscription.create()
 
 
-    def subscribe_config_updates(self, callback):
-        if self.config_subscription:
-            self.config_subscription.remove()
+    def subscribe_command_queue(self, callback):
+        if self.command_subscription:
+            self.command_subscription.remove()
 
-        self.config_subscription = Subscription(self.connection, identifier={'channel': 'ScoreboardChannel', 'api_key': self.api_key})
-        self.config_subscription.on_receive(callback=callback)
-        self.config_subscription.create()
+        self.command_subscription = Subscription(self.connection, identifier={'channel': 'ScoreboardChannel', 'api_key': self.api_key})
+        self.command_subscription.on_receive(callback=callback)
+        self.command_subscription.create()
 
 
     def scoreboard(self):

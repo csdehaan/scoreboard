@@ -32,5 +32,5 @@ setuptools.setup(
             'sb_offline = scoreboard.bin.sb_offline:main'
         ]
     },
-    install_requires = ['ActionCableZwei']
+    install_requires = ['ActionCableZwei','Pillow']
 )

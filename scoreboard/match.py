@@ -7,7 +7,7 @@ class Match:
         self.info = {}
         self.info['t1_players'] = []
         self.info['t2_players'] = []
-        self.info['referee'] = ''
+        self.referee('TBD')
         self.team1('Team 1')
         self.team2('Team 2')
         self.reset()
@@ -22,20 +22,27 @@ class Match:
         self.team2_score(0)
         self.server(self.serve_order[0])
         self.side_switch(False)
+        self.info['state'] = 'scheduled'
 
 
     def from_json(self, js):
         self.team1(js['team1_name'])
         self.team2(js['team2_name'])
+        try:
+            self.referee(js['ref_name'])
+        except:
+            self.referee('TBD')
         self.set(len(js['games']))
         self.team1_sets(js['games_team1'])
         self.team2_sets(js['games_team2'])
-        self.team1_score(js['games'][-1]['team1_score'])
-        self.team2_score(js['games'][-1]['team2_score'])
-        self.info['server'] = js['games'][-1]['server_number']
-        self.side_switch(js['games'][-1]['switch_sides?'])
-        self.game_id = js['games'][-1]['id']
+        self.info['state'] = js['state']
         self.match_id = js['id']
+        if len(js['games']) > 0:
+            self.team1_score(js['games'][-1]['team1_score'])
+            self.team2_score(js['games'][-1]['team2_score'])
+            self.info['server'] = js['games'][-1]['server_number']
+            self.side_switch(js['games'][-1]['switch_sides?'])
+            self.game_id = js['games'][-1]['id']
 
 
     def set(self, set=None):
@@ -167,3 +174,15 @@ class Match:
 
     def serving_order(self, order):
         self.serve_order = deque(order)
+
+
+    def is_scheduled(self):
+        return self.info['state'] == 'scheduled'
+
+
+    def is_in_progress(self):
+        return self.info['state'] == 'in_progress'
+
+
+    def is_complete(self):
+        return self.info['state'] == 'complete'

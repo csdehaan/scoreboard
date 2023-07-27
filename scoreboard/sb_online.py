@@ -4,8 +4,9 @@ from websocket import WebSocketTimeoutException
 import socket
 import logging
 
-from scoreboard import Version, Scoreboard
-from scoreboard.api import Api
+from .scoreboard import Scoreboard
+from .version import Version
+from .api import Api
 
 
 class AckTimeout(Exception):

@@ -5,7 +5,7 @@ from collections import deque
 import re
 import evdev
 
-from scoreboard import Scoreboard
+from .scoreboard import Scoreboard
 from .match import Match
 
 scoreboard = Scoreboard()

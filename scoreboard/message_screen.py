@@ -30,6 +30,7 @@ class MessageScreen:
 
     @periodic_task(1)
     def update(iteration, self, **kwargs):
+        if kwargs.get('display'): kwargs['display'].update()
         if kwargs['duration']-iteration <= 0:
             self.hide(**kwargs)
 
@@ -50,14 +51,14 @@ class MessageScreen:
         if workout.in_progress():
             if workout.resting:
                 if workout.exercise_rest() < 0:
-                    self.draw([workout.exercise_name(), f'SET: {workout.current_set}', 'REST'])
+                    self.draw([workout.exercise_name(), f'SET: {workout.current_set} / {workout.exercise_sets()}', 'REST'])
                 else:
-                    self.draw([workout.exercise_name(), f'SET: {workout.current_set}', f'REST: {workout.time_remaining()}'])
+                    self.draw([workout.exercise_name(), f'SET: {workout.current_set} / {workout.exercise_sets()}', f'REST: {workout.time_remaining()}'])
 
             elif workout.exercise_type() == 'repetitions':
-                self.draw([workout.exercise_name(), f'SET: {workout.current_set}', f'REPS: {workout.exercise_target()}'])
+                self.draw([workout.exercise_name(), f'SET: {workout.current_set} / {workout.exercise_sets()}', f'REPS: {workout.exercise_target()}'])
             elif workout.exercise_type() == 'duration':
-                self.draw([workout.exercise_name(), f'SET: {workout.current_set}', f'TIME: {workout.time_remaining()}'])
+                self.draw([workout.exercise_name(), f'SET: {workout.current_set} / {workout.exercise_sets()}', f'TIME: {workout.time_remaining()}'])
             elif workout.exercise_type() == 'rest':
                 self.draw([workout.exercise_name(), f'TIME: {workout.time_remaining()}'])
             if kwargs.get('display'): kwargs['display'].update()
@@ -75,10 +76,6 @@ class MessageScreen:
             if kwargs.get('workout'): self.timer = self.update_workout(**kwargs)
         self.visible = True
         if self.timer == None and kwargs.get('display'): kwargs['display'].update()
-
-
-    def show_workout(self, workout):
-        self.visible = True
 
 
     def hide(self, **kwargs):

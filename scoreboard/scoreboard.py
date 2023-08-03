@@ -3,6 +3,7 @@ import subprocess
 import re
 import json
 from time import sleep
+from datetime import datetime
 
 from .config import Config
 from .match import Match
@@ -217,6 +218,10 @@ class Scoreboard:
         self.find_screen('next_match').show(team1=team1, team2=team2, ref=ref, countdown=countdown, display=self)
 
 
+    def show_reservation(self, name, start, stop):
+        self.find_screen('next_match').show(name=name, start=start, stop=stop, style='reservation', display=self)
+
+
     ##############################################################
     ##  Workout Screen
     ##############################################################
@@ -396,6 +401,22 @@ class Scoreboard:
         return None
 
 
+    def get_reservation(self):
+        self.api.logger.debug('get_reservation')
+        try:
+            reservation = self.api.current_reservation()
+            if reservation:
+                reservation['start'] = datetime.fromisoformat(reservation['start'])
+                reservation['stop'] = datetime.fromisoformat(reservation['stop'])
+                return reservation
+
+        except Exception as e:
+            self.set_disconnected()
+            self.api.logger.exception(f'Scoreboard#get_reservation exception: {type(e).__name__} - {e}')
+
+        return None
+
+
     @periodic_task(15)
     def update_next_match(iteration, self):
         try:
@@ -407,8 +428,12 @@ class Scoreboard:
                 if next_match.is_in_progress():
                     self.show_score(next_match)
             else:
-                # self.find_screen('match').hide()
-                self.find_screen('next_match').hide(display=self)
+                reservation = self.get_reservation()
+                self.api.logger.debug(f'update_next_match current reservation = {reservation}')
+                if reservation:
+                    self.show_reservation(reservation['name'], reservation['start'], reservation['stop'])
+                else:
+                    self.find_screen('next_match').hide(display=self)
 
         except Exception as e:
             self.api.logger.error(f'update_next_match exception: {type(e).__name__} - {e}')

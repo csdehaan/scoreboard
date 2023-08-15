@@ -66,11 +66,11 @@ class ClockScreen:
 
         court_txt = f'COURT {self.court}'[0:9]
         courtx = 36 if len(court_txt) % 2 == 0 else 33
-        self.draw.text((courtx,2), court_txt.center(9), font=self.court_font, fill=self.court_color)
+        self.img_draw.text((courtx,2), court_txt.center(9), font=self.court_font, fill=self.court_color)
 
         time = datetime.now().strftime("%-I:%M")
         timex = 46 if len(time) % 2 == 0 else 41
-        self.draw.text((timex,14), time, font=self.time_font, fill=self.time_color)
+        self.img_draw.text((timex,14), time, font=self.time_font, fill=self.time_color)
 
 
     def draw64(self):
@@ -92,8 +92,8 @@ class ClockScreen:
 
         court_txt = f'COURT {self.court}'[0:9]
         courtx = 92 if len(court_txt) % 2 == 0 else 100
-        self.draw.text((courtx,10), court_txt.center(9), font=self.court_font, fill=self.court_color)
+        self.img_draw.text((courtx,10), court_txt.center(9), font=self.court_font, fill=self.court_color)
 
         time = datetime.now().strftime("%-I:%M")
         timex = 140 if len(time) % 2 == 0 else 131
-        self.draw.text((timex,48), time, font=self.time_font, fill=self.time_color)
+        self.img_draw.text((timex,48), time, font=self.time_font, fill=self.time_color)

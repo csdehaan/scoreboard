@@ -8,6 +8,7 @@ from time import sleep
 from scoreboard import Config, Version
 from scoreboard.api import Api
 from scoreboard.display_connection import Display
+from scoreboard.message_screen import MessageScreen
 
 
 def software_update(force):
@@ -35,7 +36,9 @@ def software_update(force):
 
 
     if update:
-        display.send(['mesg', 'Updating SW', f'{sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}', '', ['DO NOT TURN OFF',(255,0,0)]], 1, 8)
+        screen = MessageScreen("software_update", config)
+        screen.draw(['Updating SW', f'{sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}', '', ['DO NOT TURN OFF',(255,0,0)]])
+        display.send(screen.image, 1, 8)
 
         api.logger.info(f'Updating Scoreboard Software from {Version.str()} to {sw["major_version"]}.{sw["minor_version"]}.{sw["debug_version"]}')
         print("Running software update")

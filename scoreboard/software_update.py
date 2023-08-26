@@ -16,7 +16,9 @@ def software_update(force):
     config.read()
     update = False
     sw = None
+
     display = Display('127.0.0.1', config.display.getint("port", 6000))
+    display.send(['splash', 'Updating'], 1, 8)
 
     api = Api(config.scoreboard["api_key"], config.scoreboard.getint('log_level', 10))
     while sw == None:
@@ -25,8 +27,6 @@ def software_update(force):
         except urllib.error.URLError as e:
             print(e)
             sleep(1)
-
-    display.send(['splash', 'Updating'], 1, 8)
 
     if force: update = True
     if sw['major_version'] != 0:

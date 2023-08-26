@@ -73,7 +73,7 @@ class GPIO:
         if rpi and self.fan_fail_pin and self.fan_fail_pin < 400:
             return RPI_GPIO.input(self.fan_fail_pin) == 0
         elif self.fan_fail_gpio:
-            return self.fan_fail_gpio.read()
+            return self.fan_fail_gpio.read() == 0
         return None
 
 

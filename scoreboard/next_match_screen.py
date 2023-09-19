@@ -8,6 +8,7 @@ class NextMatchScreen:
         self.timer = None
         self.name = name
         self.visible = False
+        self.court = config.scoreboard["court"]
         self.cols = config.screen_cols()
         self.rows = config.screen_rows()
         self.resource_path = config.display.get("resource_path", "/usr/share/scoreboard")
@@ -81,7 +82,7 @@ class NextMatchScreen:
 
     def draw32(self):
         if self.style == 'reservation':
-            line1 = datetime.now().strftime("%-I:%M")
+            line1 = f'COURT {self.court}   {datetime.now().strftime("%-I:%M")}'
             line1_color = self.time_color
 
             line2 = 'RESERVED FOR'
@@ -128,7 +129,7 @@ class NextMatchScreen:
 
     def draw64(self):
         if self.style == 'reservation':
-            line1 = datetime.now().strftime("%-I:%M")
+            line1 = f'COURT {self.court}   {datetime.now().strftime("%-I:%M")}'
             line1_color = self.time_color
 
             line2 = ''
@@ -185,7 +186,7 @@ class NextMatchScreen:
 
     def draw96(self):
         if self.style == 'reservation':
-            line1 = datetime.now().strftime("%-I:%M")
+            line1 = f'COURT {self.court}   {datetime.now().strftime("%-I:%M")}'
             line1_color = self.time_color
 
             line2 = ''

@@ -88,7 +88,7 @@ class NextMatchScreen:
             line2 = 'RESERVED FOR'
             line2_color = self.next_match_color
 
-            line3 = self.reserved_for
+            line3 = self.reserved_for[0:16]
             line3_color = self.next_match_color
 
             line4 = f'{self.reservation_start.strftime("%-I:%M")} - {self.reservation_end.strftime("%-I:%M")}'
@@ -138,7 +138,7 @@ class NextMatchScreen:
             line3 = 'RESERVED FOR'
             line3_color = self.next_match_color
 
-            line4 = self.reserved_for
+            line4 = self.reserved_for[0:26]
             line4_color = self.next_match_color
 
             line5 = f'{self.reservation_start.strftime("%-I:%M")} - {self.reservation_end.strftime("%-I:%M")}'
@@ -195,7 +195,7 @@ class NextMatchScreen:
             line3 = 'RESERVED FOR'
             line3_color = self.next_match_color
 
-            line4 = self.reserved_for
+            line4 = self.reserved_for[0:22]
             line4_color = self.next_match_color
 
             line5 = f'{self.reservation_start.strftime("%-I:%M")} - {self.reservation_end.strftime("%-I:%M")}'

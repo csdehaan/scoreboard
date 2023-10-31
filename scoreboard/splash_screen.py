@@ -17,7 +17,7 @@ class SplashScreen:
             self.draw = self.draw32
         elif self.rows == 96:
             self.mesg_font = ImageFont.truetype('VeraMoBd.ttf', 18)
-            self.vbs_font = ImageFont.truetype('VeraMono.ttf', 28)
+            self.vbs_font = ImageFont.truetype('VeraMono.ttf', 26)
             self.draw = self.draw96
         else:
             self.mesg_font = ImageFont.truetype('VeraMoBd.ttf', 14)
@@ -66,6 +66,6 @@ class SplashScreen:
         self.clear()
         self.image.paste(self.logo)
 
-        self.img_draw.text((101,15), "VB Scores", font=self.vbs_font, fill=self.vbs_color)
+        self.img_draw.text((107,15), "VB Scores", font=self.vbs_font, fill=self.vbs_color)
         mesgx = 89 if len(msg) % 2 == 0 else 95
         self.draw_text_line(msg.center(15), 15, mesgx, 55, self.mesg_color)

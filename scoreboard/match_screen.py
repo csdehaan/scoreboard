@@ -20,7 +20,7 @@ class MatchScreen:
             self.score_font = ImageFont.load(self.resource_path + '/fonts/8x13B.pil')
             self.draw = self.draw32
         elif self.rows == 96:
-            self.player_name_font = ImageFont.truetype('VeraMoBd.ttf', 18)
+            self.player_name_font = ImageFont.truetype('VeraMoBd.ttf', 22)
             self.score_font = ImageFont.truetype('VeraMono.ttf', 40)
             self.draw = self.draw96
         else:
@@ -164,28 +164,28 @@ class MatchScreen:
         self.clear()
 
         if match.player(1,3):
-            self.draw_player_name(match.player(1, 1), 10, 2, 0, match.server() == 11)
-            self.draw_player_name(match.player(1, 3), 10, 105, 0, match.server() == 13)
+            self.draw_player_name(match.player(1, 1), 8, 2, 0, match.server() == 11)
+            self.draw_player_name(match.player(1, 3), 8, 105, 0, match.server() == 13)
         else:
-            self.draw_player_name(match.player(1, 1), 20, 2, 0, match.server() == 11)
+            self.draw_player_name(match.player(1, 1), 16, 2, 0, match.server() == 11)
 
         if match.player(1,4):
-            self.draw_player_name(match.player(1, 2), 10, 2, 24, match.server() == 12)
-            self.draw_player_name(match.player(1, 4), 10, 105, 24, match.server() == 14)
+            self.draw_player_name(match.player(1, 2), 8, 2, 24, match.server() == 12)
+            self.draw_player_name(match.player(1, 4), 8, 105, 24, match.server() == 14)
         else:
-            self.draw_player_name(match.player(1, 2), 20, 2, 24, match.server() == 12)
+            self.draw_player_name(match.player(1, 2), 16, 2, 24, match.server() == 12)
 
         if match.player(2,3):
-            self.draw_player_name(match.player(2, 1), 10, 2, 48, match.server() == 21)
-            self.draw_player_name(match.player(2, 3), 10, 105, 48, match.server() == 23)
+            self.draw_player_name(match.player(2, 1), 8, 2, 48, match.server() == 21)
+            self.draw_player_name(match.player(2, 3), 8, 105, 48, match.server() == 23)
         else:
-            self.draw_player_name(match.player(2, 1), 20, 2, 48, match.server() == 21)
+            self.draw_player_name(match.player(2, 1), 16, 2, 48, match.server() == 21)
 
         if match.player(2,4):
-            self.draw_player_name(match.player(2, 2), 10, 2, 72, match.server() == 22)
-            self.draw_player_name(match.player(2, 4), 10, 105, 72, match.server() == 24)
+            self.draw_player_name(match.player(2, 2), 8, 2, 72, match.server() == 22)
+            self.draw_player_name(match.player(2, 4), 8, 105, 72, match.server() == 24)
         else:
-            self.draw_player_name(match.player(2, 2), 20, 2, 72, match.server() == 22)
+            self.draw_player_name(match.player(2, 2), 16, 2, 72, match.server() == 22)
 
         self.draw_score(match.team1_score(), 208, -3)
         self.draw_score(match.team2_score(), 208, 46)

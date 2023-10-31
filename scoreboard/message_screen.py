@@ -86,47 +86,47 @@ class MessageScreen:
         if kwargs.get('display'): kwargs['display'].update()
 
 
-    def get_msg_text(self, msg):
+    def get_msg_text(self, msg, max_length):
             if isinstance(msg, (list,tuple)):
-                return((msg[0],msg[1]))
+                return((msg[0][0:max_length],msg[1]))
             else:
-                return((msg,self.default_color))
+                return((msg[0:max_length],self.default_color))
 
 
     def draw32(self, msg):
         self.clear()
         if len(msg) == 1:
-            text, color = self.get_msg_text(msg[0])
+            text, color = self.get_msg_text(msg[0], 16)
             [x,l] = [1,16] if (len(text) % 2 == 0) else [3,15]
             self.img_draw.text((x,10), text.center(l), font=self.mesg_font, fill=color)
         if len(msg) == 2:
-            text, color = self.get_msg_text(msg[0])
+            text, color = self.get_msg_text(msg[0], 16)
             [x,l] = [1,16] if (len(text) % 2 == 0) else [3,15]
             self.img_draw.text((x,5), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[1])
+            text, color = self.get_msg_text(msg[1], 16)
             [x,l] = [1,16] if (len(text) % 2 == 0) else [3,15]
             self.img_draw.text((x,15), text.center(l), font=self.mesg_font, fill=color)
         if len(msg) == 3:
-            text, color = self.get_msg_text(msg[0])
+            text, color = self.get_msg_text(msg[0], 16)
             [x,l] = [1,16] if (len(text) % 2 == 0) else [3,15]
             self.img_draw.text((x,0), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[1])
+            text, color = self.get_msg_text(msg[1], 16)
             [x,l] = [1,16] if (len(text) % 2 == 0) else [3,15]
             self.img_draw.text((x,10), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[2])
+            text, color = self.get_msg_text(msg[2], 16)
             [x,l] = [1,16] if (len(text) % 2 == 0) else [3,15]
             self.img_draw.text((x,20), text.center(l), font=self.mesg_font, fill=color)
         if len(msg) > 3:
-            text, color = self.get_msg_text(msg[0])
+            text, color = self.get_msg_text(msg[0], 16)
             [x,l] = [1,16] if (len(text) % 2 == 0) else [4,15]
             self.img_draw.text((x,-3), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[1])
+            text, color = self.get_msg_text(msg[1], 16)
             [x,l] = [1,16] if (len(text) % 2 == 0) else [4,15]
             self.img_draw.text((x,5), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[2])
+            text, color = self.get_msg_text(msg[2], 16)
             [x,l] = [1,16] if (len(text) % 2 == 0) else [4,15]
             self.img_draw.text((x,13), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[3])
+            text, color = self.get_msg_text(msg[3], 16)
             [x,l] = [1,16] if (len(text) % 2 == 0) else [4,15]
             self.img_draw.text((x,21), text.center(l), font=self.mesg_font, fill=color)
 
@@ -134,37 +134,37 @@ class MessageScreen:
     def draw64(self, msg):
         self.clear()
         if len(msg) == 1:
-            text, color = self.get_msg_text(msg[0])
+            text, color = self.get_msg_text(msg[0], 20)
             [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
             self.img_draw.text((x,22), text.center(l), font=self.mesg_font, fill=color)
         if len(msg) == 2:
-            text, color = self.get_msg_text(msg[0])
+            text, color = self.get_msg_text(msg[0], 20)
             [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
             self.img_draw.text((x,10), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[1])
+            text, color = self.get_msg_text(msg[1], 20)
             [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
             self.img_draw.text((x,32), text.center(l), font=self.mesg_font, fill=color)
         if len(msg) == 3:
-            text, color = self.get_msg_text(msg[0])
+            text, color = self.get_msg_text(msg[0], 20)
             [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
             self.img_draw.text((x,3), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[1])
+            text, color = self.get_msg_text(msg[1], 20)
             [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
             self.img_draw.text((x,23), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[2])
+            text, color = self.get_msg_text(msg[2], 20)
             [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
             self.img_draw.text((x,43), text.center(l), font=self.mesg_font, fill=color)
         if len(msg) > 3:
-            text, color = self.get_msg_text(msg[0])
+            text, color = self.get_msg_text(msg[0], 20)
             [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
             self.img_draw.text((x,0), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[1])
+            text, color = self.get_msg_text(msg[1], 20)
             [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
             self.img_draw.text((x,15), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[2])
+            text, color = self.get_msg_text(msg[2], 20)
             [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
             self.img_draw.text((x,30), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[3])
+            text, color = self.get_msg_text(msg[3], 20)
             [x,l] = [0,20] if (len(text) % 2 == 0) else [4,19]
             self.img_draw.text((x,45), text.center(l), font=self.mesg_font, fill=color)
 
@@ -172,36 +172,36 @@ class MessageScreen:
     def draw96(self, msg):
         self.clear()
         if len(msg) == 1:
-            text, color = self.get_msg_text(msg[0])
+            text, color = self.get_msg_text(msg[0], 20)
             [x,l] = [1,20] if (len(text) % 2 == 0) else [7,19]
             self.img_draw.text((x,34), text.center(l), font=self.mesg_font, fill=color)
         if len(msg) == 2:
-            text, color = self.get_msg_text(msg[0])
+            text, color = self.get_msg_text(msg[0], 20)
             [x,l] = [1,20] if (len(text) % 2 == 0) else [7,19]
             self.img_draw.text((x,15), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[1])
+            text, color = self.get_msg_text(msg[1], 20)
             [x,l] = [1,20] if (len(text) % 2 == 0) else [7,19]
             self.img_draw.text((x,48), text.center(l), font=self.mesg_font, fill=color)
         if len(msg) == 3:
-            text, color = self.get_msg_text(msg[0])
+            text, color = self.get_msg_text(msg[0], 20)
             [x,l] = [1,20] if (len(text) % 2 == 0) else [7,19]
             self.img_draw.text((x,4), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[1])
+            text, color = self.get_msg_text(msg[1], 20)
             [x,l] = [1,20] if (len(text) % 2 == 0) else [7,19]
             self.img_draw.text((x,35), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[2])
+            text, color = self.get_msg_text(msg[2], 20)
             [x,l] = [1,20] if (len(text) % 2 == 0) else [7,19]
             self.img_draw.text((x,66), text.center(l), font=self.mesg_font, fill=color)
         if len(msg) > 3:
-            text, color = self.get_msg_text(msg[0])
+            text, color = self.get_msg_text(msg[0], 20)
             [x,l] = [1,20] if (len(text) % 2 == 0) else [7,19]
             self.img_draw.text((x,1), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[1])
+            text, color = self.get_msg_text(msg[1], 20)
             [x,l] = [1,20] if (len(text) % 2 == 0) else [7,19]
             self.img_draw.text((x,24), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[2])
+            text, color = self.get_msg_text(msg[2], 20)
             [x,l] = [1,20] if (len(text) % 2 == 0) else [7,19]
             self.img_draw.text((x,47), text.center(l), font=self.mesg_font, fill=color)
-            text, color = self.get_msg_text(msg[3])
+            text, color = self.get_msg_text(msg[3], 20)
             [x,l] = [1,20] if (len(text) % 2 == 0) else [7,19]
             self.img_draw.text((x,70), text.center(l), font=self.mesg_font, fill=color)

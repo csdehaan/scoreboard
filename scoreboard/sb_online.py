@@ -16,6 +16,11 @@ class AckTimeout(Exception):
 scoreboard = Scoreboard()
 
 
+def ping_success():
+    global scoreboard
+    scoreboard.set_connected()
+
+
 def ping_timeout(ws_app, error):
     global scoreboard
 
@@ -33,7 +38,7 @@ def sb_online(configfile=None):
     scoreboard.init_gpio()
     scoreboard.init_solar_ctrl()
 
-    scoreboard.api = Api(scoreboard.config.scoreboard["api_key"], scoreboard.config.scoreboard.getint('log_level', logging.WARNING), ping_timeout)
+    scoreboard.api = Api(scoreboard.config.scoreboard["api_key"], scoreboard.config.scoreboard.getint('log_level', logging.WARNING), ping_timeout, ping_success)
     scoreboard.api.logger.info(f'Scoreboard {scoreboard.config.scoreboard["serial"]} Ver {Version.str()} Online')
 
     # log the current IP address

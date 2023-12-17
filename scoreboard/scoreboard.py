@@ -393,14 +393,14 @@ class Scoreboard:
         self.api.logger.debug('get_next_match')
         try:
             next_match = self.api.next_match()
-            self.find_screen('connecting').visible = False
+            # self.find_screen('connecting').visible = False
             if next_match:
                 match = Match()
                 match.from_json(next_match)
                 return match
 
         except Exception as e:
-            self.set_disconnected()
+            # self.set_disconnected()
             self.api.logger.exception(f'Scoreboard#get_next_match exception: {type(e).__name__} - {e}')
 
         return None
@@ -416,7 +416,7 @@ class Scoreboard:
                 return reservation
 
         except Exception as e:
-            self.set_disconnected()
+            # self.set_disconnected()
             self.api.logger.exception(f'Scoreboard#get_reservation exception: {type(e).__name__} - {e}')
 
         return None

@@ -12,11 +12,11 @@ WS = "wss"
 
 class Api:
 
-    def __init__(self, api_key, log_level, actioncable_error=None):
+    def __init__(self, api_key, log_level, actioncable_error=None, ping_callback=None):
         self.api_key = api_key
         self.score_subscription = None
         self.command_subscription = None
-        self.connection = Connection(url=f'{WS}://{SERVER}/cable', on_error=actioncable_error)
+        self.connection = Connection(url=f'{WS}://{SERVER}/cable', on_error=actioncable_error, on_ping=ping_callback)
         self.connection.connect()
         self.logger = logger.getLogger('scoreboard', int(log_level), api_key)
 

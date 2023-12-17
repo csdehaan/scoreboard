@@ -35,9 +35,9 @@ class ClockScreen:
 
 
     def load_logo(self, org):
-        size = '' if (self.rows == 32) else self.rows
+        size = self.rows
         try:
-            self.logo = Image.open(f'{self.resource_path}/{org}{size}.png').convert('RGB')
+            self.logo = Image.open(f'/media/data/logo/{org}{size}.png').convert('RGB')
         except:
             self.logo = Image.open(f'{self.resource_path}/vbs{size}.png').convert('RGB')
 

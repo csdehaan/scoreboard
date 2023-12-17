@@ -94,9 +94,6 @@ def main():
                 mode = 'online'
                 sleep(0.25)
 
-                # start wpa_supplicant?
-                #subprocess.run(["systemctl", "start", "wpa_supplicant"])
-
                 # check for software updates
                 subprocess.run(["software_update"])
 

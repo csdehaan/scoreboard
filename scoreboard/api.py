@@ -49,6 +49,11 @@ class Api:
         return json.loads(response)
 
 
+    def get_scoreboard_logo(self, size, filename):
+        download_url = f'{HTTP}://{SERVER}/apiv1/logo.json?size={size}&api_key='+self.api_key
+        request.urlretrieve(download_url, filename)
+
+
     def scoreboard_status(self, status):
         data = parse.urlencode({'status': json.dumps(status)}).encode()
         request.urlopen(f'{HTTP}://{SERVER}/apiv1/scoreboard_status.json?api_key='+self.api_key, data=data, timeout=5)

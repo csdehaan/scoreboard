@@ -164,31 +164,31 @@ class MatchScreen:
         self.clear()
 
         if match.player(1,3):
-            self.draw_player_name(match.player(1, 1), 8, 2, 0, match.server() == 11)
-            self.draw_player_name(match.player(1, 3), 8, 105, 0, match.server() == 13)
+            self.draw_player_name(match.player(1, 1), 8, 2, -2, match.server() == 11)
+            self.draw_player_name(match.player(1, 3), 8, 105, -2, match.server() == 13)
         else:
-            self.draw_player_name(match.player(1, 1), 16, 2, 0, match.server() == 11)
+            self.draw_player_name(match.player(1, 1), 16, 2, -2, match.server() == 11)
 
         if match.player(1,4):
-            self.draw_player_name(match.player(1, 2), 8, 2, 24, match.server() == 12)
-            self.draw_player_name(match.player(1, 4), 8, 105, 24, match.server() == 14)
+            self.draw_player_name(match.player(1, 2), 8, 2, 22, match.server() == 12)
+            self.draw_player_name(match.player(1, 4), 8, 105, 22, match.server() == 14)
         else:
-            self.draw_player_name(match.player(1, 2), 16, 2, 24, match.server() == 12)
+            self.draw_player_name(match.player(1, 2), 16, 2, 22, match.server() == 12)
 
         if match.player(2,3):
-            self.draw_player_name(match.player(2, 1), 8, 2, 48, match.server() == 21)
-            self.draw_player_name(match.player(2, 3), 8, 105, 48, match.server() == 23)
+            self.draw_player_name(match.player(2, 1), 8, 2, 46, match.server() == 21)
+            self.draw_player_name(match.player(2, 3), 8, 105, 46, match.server() == 23)
         else:
-            self.draw_player_name(match.player(2, 1), 16, 2, 48, match.server() == 21)
+            self.draw_player_name(match.player(2, 1), 16, 2, 46, match.server() == 21)
 
         if match.player(2,4):
-            self.draw_player_name(match.player(2, 2), 8, 2, 72, match.server() == 22)
-            self.draw_player_name(match.player(2, 4), 8, 105, 72, match.server() == 24)
+            self.draw_player_name(match.player(2, 2), 8, 2, 70, match.server() == 22)
+            self.draw_player_name(match.player(2, 4), 8, 105, 70, match.server() == 24)
         else:
-            self.draw_player_name(match.player(2, 2), 16, 2, 72, match.server() == 22)
+            self.draw_player_name(match.player(2, 2), 16, 2, 70, match.server() == 22)
 
-        self.draw_score(match.team1_score(), 208, -3)
-        self.draw_score(match.team2_score(), 208, 46)
+        self.draw_score(match.team1_score(), 208, 0)
+        self.draw_score(match.team2_score(), 208, 49)
 
         if match.team1_sets() > 0:
             self.img_draw.pieslice([(245,40),(250,45)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)

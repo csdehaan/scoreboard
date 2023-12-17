@@ -41,13 +41,13 @@ def sb_online(configfile=None):
     s.connect(("8.8.8.8", 80))
     scoreboard.api.logger.info(f'IP Address = {s.getsockname()[0]}')
 
-    # check if the scoreboard has been reassigned to a dirreent organization
+    # check if the scoreboard has been reassigned to a different organization
     sb = scoreboard.api.scoreboard()
     logo_img = sb["organization"]["abbrev"]
     if logo_img != scoreboard.config.display.get("logo", logo_img):
         scoreboard.set_logo(logo_img)
 
-    # check if the scoreboard has been reassigned to a dirreent court
+    # check if the scoreboard has been reassigned to a different court
     court = str(sb['court'])
     if court != scoreboard.config.scoreboard["court"]:
         scoreboard.set_court(court)

@@ -171,12 +171,12 @@ class Scoreboard:
         if not Path(filename).is_file():
             # remount filesystem r/w
             if self.config.archive:
-                subprocess.run(['mount','-o','remount,','rw','/dev/mmcblk0p2','/media/data'], capture_output=False)
+                subprocess.run(['mount','-o','remount','-w','/dev/mmcblk0p2','/media/data'], capture_output=False)
             # download from web server
             self.api.get_scoreboard_logo(self.config.screen_rows(), filename)
             # remount filesystem r/o
             if self.config.archive:
-                subprocess.run(['mount','-o','remount,','ro','/dev/mmcblk0p2','/media/data'], capture_output=False)
+                subprocess.run(['mount','-o','remount','-r','/dev/mmcblk0p2','/media/data'], capture_output=False)
 
 
     def set_court(self, court):

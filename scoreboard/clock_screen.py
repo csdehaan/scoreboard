@@ -2,9 +2,12 @@
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 from .periodic import periodic_task
+from platform import system
 
 class ClockScreen:
     def __init__(self, name, config):
+        self.time_fmt = "%-I:%M"
+        if system() == 'windows': self.time_fmt = "%#I:%M"
         self.timer = None
         self.name = name
         self.visible = False
@@ -68,7 +71,7 @@ class ClockScreen:
         courtx = 36 if len(court_txt) % 2 == 0 else 33
         self.img_draw.text((courtx,2), court_txt.center(9), font=self.court_font, fill=self.court_color)
 
-        time = datetime.now().strftime("%-I:%M")
+        time = datetime.now().strftime(self.time_fmt)
         timex = 46 if len(time) % 2 == 0 else 41
         self.img_draw.text((timex,14), time, font=self.time_font, fill=self.time_color)
 
@@ -81,7 +84,7 @@ class ClockScreen:
         courtx = 69 if len(court_txt) % 2 == 0 else 75
         self.img_draw.text((courtx,7), court_txt.center(9), font=self.court_font, fill=self.court_color)
 
-        time = datetime.now().strftime("%-I:%M")
+        time = datetime.now().strftime(self.time_fmt)
         timex = 99 if len(time) % 2 == 0 else 92
         self.img_draw.text((timex,30), time, font=self.time_font, fill=self.time_color)
 
@@ -94,6 +97,6 @@ class ClockScreen:
         courtx = 92 if len(court_txt) % 2 == 0 else 100
         self.img_draw.text((courtx,10), court_txt.center(9), font=self.court_font, fill=self.court_color)
 
-        time = datetime.now().strftime("%-I:%M")
+        time = datetime.now().strftime(self.time_fmt)
         timex = 140 if len(time) % 2 == 0 else 131
         self.img_draw.text((timex,48), time, font=self.time_font, fill=self.time_color)

@@ -7,7 +7,7 @@ from platform import system
 class ClockScreen:
     def __init__(self, name, config):
         self.time_fmt = "%-I:%M"
-        if system() == 'windows': self.time_fmt = "%#I:%M"
+        if system() == 'Windows': self.time_fmt = "%#I:%M"
         self.timer = None
         self.name = name
         self.visible = False

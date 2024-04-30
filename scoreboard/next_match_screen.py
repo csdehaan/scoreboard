@@ -2,9 +2,12 @@
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 from .periodic import periodic_task
+from platform import system
 
 class NextMatchScreen:
     def __init__(self, name, config):
+        self.time_fmt = "%-I:%M"
+        if system() == 'Windows': self.time_fmt = "%#I:%M"
         self.timer = None
         self.name = name
         self.visible = False
@@ -82,7 +85,7 @@ class NextMatchScreen:
 
     def draw32(self):
         if self.style == 'reservation':
-            line1 = f'COURT {self.court}   {datetime.now().strftime("%-I:%M")}'
+            line1 = f'COURT {self.court}   {datetime.now().strftime(self.time_fmt)}'
             line1_color = self.time_color
 
             line2 = 'RESERVED FOR'
@@ -91,7 +94,7 @@ class NextMatchScreen:
             line3 = self.reserved_for[0:16]
             line3_color = self.next_match_color
 
-            line4 = f'{self.reservation_start.strftime("%-I:%M")} - {self.reservation_end.strftime("%-I:%M")}'
+            line4 = f'{self.reservation_start.strftime(self.time_fmt)} - {self.reservation_end.strftime(self.time_fmt)}'
             line4_color = self.next_match_color
 
         else:
@@ -129,7 +132,7 @@ class NextMatchScreen:
 
     def draw64(self):
         if self.style == 'reservation':
-            line1 = f'COURT {self.court}   {datetime.now().strftime("%-I:%M")}'
+            line1 = f'COURT {self.court}   {datetime.now().strftime(self.time_fmt)}'
             line1_color = self.time_color
 
             line2 = ''
@@ -141,7 +144,7 @@ class NextMatchScreen:
             line4 = self.reserved_for[0:26]
             line4_color = self.next_match_color
 
-            line5 = f'{self.reservation_start.strftime("%-I:%M")} - {self.reservation_end.strftime("%-I:%M")}'
+            line5 = f'{self.reservation_start.strftime(self.time_fmt)} - {self.reservation_end.strftime(self.time_fmt)}'
             line5_color = self.next_match_color
 
         else:
@@ -186,7 +189,7 @@ class NextMatchScreen:
 
     def draw96(self):
         if self.style == 'reservation':
-            line1 = f'COURT {self.court}   {datetime.now().strftime("%-I:%M")}'
+            line1 = f'COURT {self.court}   {datetime.now().strftime(self.time_fmt)}'
             line1_color = self.time_color
 
             line2 = ''
@@ -198,7 +201,7 @@ class NextMatchScreen:
             line4 = self.reserved_for[0:22]
             line4_color = self.next_match_color
 
-            line5 = f'{self.reservation_start.strftime("%-I:%M")} - {self.reservation_end.strftime("%-I:%M")}'
+            line5 = f'{self.reservation_start.strftime(self.time_fmt)} - {self.reservation_end.strftime(self.time_fmt)}'
             line5_color = self.next_match_color
 
         else:

@@ -5,6 +5,6 @@ from scoreboard.sb_online import sb_online
 
 def main():
     try:
-        sb_online(sys.argv[1])
+        sb_online(sys.argv[1], sys.argv[2])
     except IndexError:
-        sb_online()
+        sb_online(sys.argv[1])

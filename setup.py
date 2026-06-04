@@ -29,7 +29,7 @@ setuptools.setup(
             'software_update = scoreboard.bin.software_update:main',
             'display = scoreboard.bin.display:main',
             'sb_online = scoreboard.bin.sb_online:main',
-            'sb_offline = scoreboard.bin.sb_offline:main'
+            'send_event = scoreboard.bin.send_event:main'
         ]
     },
     install_requires = ['ActionCableZwei>=1.2.0.0','Pillow']

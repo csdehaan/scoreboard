@@ -5,6 +5,7 @@ import json
 from time import sleep
 from datetime import datetime
 from pathlib import Path
+from multiprocessing.connection import Listener
 
 from .config import Config
 from .match import Match
@@ -40,6 +41,7 @@ class Scoreboard:
 
     def init_display_stack(self):
         self.open_display()
+        self.add_screen(MessageScreen('blank', self.config))
         self.add_screen(ClockScreen('clock', self.config))
         self.add_screen(MessageScreen('menu', self.config))
         self.add_screen(MessageScreen('workout', self.config))
@@ -50,6 +52,8 @@ class Scoreboard:
         self.add_screen(MessageScreen('timeout', self.config))
         self.add_screen(MessageScreen('connecting', self.config))
 
+        self.find_screen('blank').draw([])
+        self.find_screen('blank').visible = True
         self.find_screen('clock').run(self)
         self.find_screen('switch_sides').draw(['SWITCH','SIDES'])
         self.find_screen('connecting').draw(['Connecting ...'])
@@ -148,6 +152,14 @@ class Scoreboard:
     def clear_screen(self):
         for screen in self.screens:
             if screen.name == 'clock': screen.visible = True
+            if screen.name == 'blank': screen.visible = True
+            else: screen.visible = False
+        self.update()
+
+
+    def blank_screen(self):
+        for screen in self.screens:
+            if screen.name == 'blank': screen.visible = True
             else: screen.visible = False
         self.update()
 
@@ -442,3 +454,25 @@ class Scoreboard:
 
         except Exception as e:
             self.api.logger.error(f'update_next_match exception: {type(e).__name__} - {e}')
+
+
+    ##############################################################
+    ##  Handle Web Events
+    ##############################################################
+    def handle_events(self):
+        listener = Listener(('127.0.0.1', 5900), authkey=b'vbscores')
+        while True:
+            conn = listener.accept()
+
+            try:
+                msg = conn.recv()
+                if msg['cmd'] == 'score':
+                    match = Match()
+                    match.from_json(json.loads(msg['data']))
+                    self.show_score(match)
+                if msg['cmd'] == 'stop':
+                    self.clear_screen()
+            except Exception as e:
+                print(f'Event Exception: [{type(e).__name__}] - {e}')
+            finally:
+                conn.close()

@@ -1,6 +1,7 @@
 
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
+from time import strptime
 from .periodic import periodic_task
 from platform import system
 
@@ -18,6 +19,8 @@ class ClockScreen:
         self.court = config.scoreboard["court"]
         self.court_color = (255,0,0)
         self.time_color = (255,0,0)
+        self.on_time = strptime(config.scoreboard.get("on_time", "00:00:00"), "%H:%M:%S")
+        self.off_time = strptime(config.scoreboard.get("off_time", "23:59:59"), "%H:%M:%S")
         if self.rows == 32:
             self.court_font = ImageFont.load(self.resource_path + '/fonts/7x13B.pil')
             self.time_font = ImageFont.load(self.resource_path + '/fonts/9x18B.pil')
@@ -47,6 +50,11 @@ class ClockScreen:
 
     @periodic_task(10)
     def update(iteration, self, **kwargs):
+        time = strptime(datetime.now().strftime("%H:%M:%S"), "%H:%M:%S")
+        if time > self.on_time and time < self.off_time:
+            self.visible = True
+        else:
+            self.visible = False
         self.draw()
         if kwargs.get('display'): kwargs['display'].update()
 

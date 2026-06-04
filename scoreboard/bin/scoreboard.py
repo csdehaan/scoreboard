@@ -19,18 +19,15 @@ gpio = None
 def switch_toggled(channel):
     global process
     global mode
-    global mode_pin
     global gpio
 
     sleep(0.25)
     if process and ((gpio.online() and mode == 'offline') or (gpio.offline() and mode == 'online')):
-        print('Killing old process')
         process.kill()
         process = None
 
 
 def sig_handler(signum, frame):
-    global display
     global process
     global running
 
@@ -82,13 +79,12 @@ def main():
                 print('Starting QT Mode')
 
                 # start the app
-                process = subprocess.Popen(["sb_online", configfile])
+                process = subprocess.Popen(["sb_online", 'online', configfile])
                 process.wait()
                 print('QT Mode Exited')
 
             elif gpio.online():
                 display.send(['splash', 'Connecting'], 1, 80)
-                print('Starting Online Mode')
 
                 # online mode
                 mode = 'online'
@@ -98,19 +94,16 @@ def main():
                 subprocess.run(["software_update"])
 
                 # start the app
-                process = subprocess.Popen(["sb_online"])
+                process = subprocess.Popen(["sb_online", mode])
                 process.wait()
-                print('Online Mode Exited')
 
             else:
                 display.send(['ping'], 1, 80)
-                print('Starting Offline Mode')
 
                 # offline mode
                 mode = 'offline'
-                process = subprocess.Popen(["sb_offline"])
+                process = subprocess.Popen(["sb_online", mode])
                 process.wait()
-                print('Offline Mode Exited')
 
         except ConnectionRefusedError:
             sleep(0.25)

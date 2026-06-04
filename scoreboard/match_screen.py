@@ -100,17 +100,11 @@ class MatchScreen:
         self.draw_score(match.team1_score(), 80, 1)
         self.draw_score(match.team2_score(), 80, 17)
 
-        if match.team1_sets() > 0:
-            self.img_draw.pieslice([(91,13),(92,14)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
+        for i in range(match.team1_sets()):
+            self.img_draw.pieslice([(91-(i*5),13),(92-(i*5),14)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
 
-        if match.team1_sets() > 1:
-            self.img_draw.pieslice([(86,13),(87,14)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
-
-        if match.team2_sets() > 0:
-            self.img_draw.pieslice([(91,29),(92,30)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
-
-        if match.team2_sets() > 1:
-            self.img_draw.pieslice([(86,29),(87,30)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
+        for i in range(match.team2_sets()):
+            self.img_draw.pieslice([(91-(i*5),29),(92-(i*5),30)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
 
         self.img_draw.line([(0,16),(95,16)], fill=self.divide_line_color, width=1)
 
@@ -145,17 +139,11 @@ class MatchScreen:
         self.draw_score(match.team1_score(), 160, -1)
         self.draw_score(match.team2_score(), 160, 31)
 
-        if match.team1_sets() > 0:
-            self.img_draw.pieslice([(181,25),(185,29)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
+        for i in range(match.team1_sets()):
+            self.img_draw.pieslice([(181-(i*10),25),(185-(i*10),29)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
 
-        if match.team1_sets() > 1:
-            self.img_draw.pieslice([(171,25),(175,29)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
-
-        if match.team2_sets() > 0:
-            self.img_draw.pieslice([(181,57),(185,61)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
-
-        if match.team2_sets() > 1:
-            self.img_draw.pieslice([(171,57),(175,61)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
+        for i in range(match.team2_sets()):
+            self.img_draw.pieslice([(181-(i*10),57),(185-(i*10),61)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
 
         self.img_draw.line([(0,32),(191,32)], fill=self.divide_line_color, width=1)
 
@@ -190,16 +178,10 @@ class MatchScreen:
         self.draw_score(match.team1_score(), 208, 0)
         self.draw_score(match.team2_score(), 208, 49)
 
-        if match.team1_sets() > 0:
-            self.img_draw.pieslice([(245,40),(250,45)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
+        for i in range(match.team1_sets()):
+            self.img_draw.pieslice([(245-(i*12),40),(250-(i*12),45)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
 
-        if match.team1_sets() > 1:
-            self.img_draw.pieslice([(233,40),(238,45)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
-
-        if match.team2_sets() > 0:
-            self.img_draw.pieslice([(245,88),(250,93)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
-
-        if match.team2_sets() > 1:
-            self.img_draw.pieslice([(233,88),(238,93)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
+        for i in range(match.team2_sets()):
+            self.img_draw.pieslice([(245-(i*12),88),(250-(i*12),93)], start=0.0, end=360.0, fill=self.set_dot_color, outline=self.set_dot_color)
 
         self.img_draw.line([(0,48),(255,48)], fill=self.divide_line_color, width=1)

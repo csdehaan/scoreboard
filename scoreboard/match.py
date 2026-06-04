@@ -26,23 +26,20 @@ class Match:
 
 
     def from_json(self, js):
-        self.team1(js['team1_name'])
-        self.team2(js['team2_name'])
-        try:
-            self.referee(js['ref_name'])
-        except:
-            self.referee('TBD')
-        self.set(len(js['games']))
-        self.team1_sets(js['games_team1'])
-        self.team2_sets(js['games_team2'])
-        self.info['state'] = js['state']
-        self.match_id = js['id']
-        if len(js['games']) > 0:
-            self.team1_score(js['games'][-1]['team1_score'])
-            self.team2_score(js['games'][-1]['team2_score'])
-            self.info['server'] = js['games'][-1]['server_number']
-            self.side_switch(js['games'][-1]['switch_sides?'])
-            self.game_id = js['games'][-1]['id']
+        self.team1(js.get('team1_name', 'Team 1'))
+        self.team2(js.get('team2_name', 'Team 2'))
+        self.referee(js.get('ref_name', 'TBD'))
+        self.set(len(js.get('games', [])))
+        self.team1_sets(js.get('games_team1', 0))
+        self.team2_sets(js.get('games_team2', 0))
+        self.info['state'] = js.get('state', 'scheduled')
+        self.match_id = js.get('id')
+        if self.set() > 0:
+            self.team1_score(js['games'][-1].get('team1_score', 0))
+            self.team2_score(js['games'][-1].get('team2_score', 0))
+            self.info['server'] = js['games'][-1].get('server_number', 0)
+            self.side_switch(js['games'][-1].get('switch_sides?', False))
+            self.game_id = js['games'][-1].get('id')
 
 
     def set(self, set=None):

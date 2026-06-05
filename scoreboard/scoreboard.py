@@ -471,7 +471,7 @@ class Scoreboard:
                     match.from_json(json.loads(msg['data']))
                     self.show_score(match)
                 if msg['cmd'] == 'stop':
-                    self.clear_screen()
+                    self.hide_score()
             except Exception as e:
                 print(f'Event Exception: [{type(e).__name__}] - {e}')
             finally:

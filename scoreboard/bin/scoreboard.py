@@ -104,7 +104,7 @@ def main():
                 # set wifi to AP mode
                 subprocess.run(["iwctl", "device", "wlan0", "set-property", "Mode", "ap"])
                 sleep(1)
-                subprocess.run(["iwctl", "ap", "wlan0", "start", f'"SB{config.scoreboard.get("serial")}"', f'"{config.scoreboard.get("password")}"'])
+                subprocess.run(["iwctl", "ap", "wlan0", "start-profile", f'SB{config.scoreboard.get("serial")}'])
 
                 display.send(['ping'], 1, 80)
 

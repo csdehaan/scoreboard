@@ -85,7 +85,7 @@ def main():
 
             elif gpio.online():
                 # turn off AP mode
-                subprocess.run(["iwctl", "device", "wlan0", "set-property", "Mode", "station"])
+                subprocess.run(["portal", "down"])
 
                 display.send(['splash', 'Connecting'], 1, 80)
 
@@ -102,9 +102,7 @@ def main():
 
             else:
                 # set wifi to AP mode
-                subprocess.run(["iwctl", "device", "wlan0", "set-property", "Mode", "ap"])
-                sleep(1)
-                subprocess.run(["iwctl", "ap", "wlan0", "start-profile", f'SB{config.scoreboard.get("serial")}'])
+                subprocess.run(["portal", "up", f'SB{config.scoreboard.get("serial")}'])
 
                 display.send(['ping'], 1, 80)
 

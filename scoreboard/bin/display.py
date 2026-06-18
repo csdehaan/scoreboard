@@ -4,7 +4,7 @@ import sys
 from scoreboard.display import rgb_display
 
 def main():
-    try:
-        rgb_display(sys.argv[1])
-    except IndexError:
-        rgb_display()
+    cfg_file = None
+    if (len(sys.argv) > 1): cfg_file = sys.argv[1]
+
+    rgb_display(cfg_file)

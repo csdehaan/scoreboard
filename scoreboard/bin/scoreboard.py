@@ -79,7 +79,7 @@ def main():
                 print('Starting QT Mode')
 
                 # start the app
-                process = subprocess.Popen(["sb_online", 'online', configfile])
+                process = subprocess.Popen(["sb_start", 'online', configfile])
                 process.wait()
                 print('QT Mode Exited')
 
@@ -97,7 +97,7 @@ def main():
                 subprocess.run(["software_update"])
 
                 # start the app
-                process = subprocess.Popen(["sb_online", mode])
+                process = subprocess.Popen(["sb_start", mode])
                 process.wait()
 
             else:
@@ -108,7 +108,7 @@ def main():
 
                 # offline mode
                 mode = 'offline'
-                process = subprocess.Popen(["sb_online", mode])
+                process = subprocess.Popen(["sb_start", mode])
                 process.wait()
 
         except ConnectionRefusedError:

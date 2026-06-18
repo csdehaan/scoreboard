@@ -6,6 +6,9 @@ from time import sleep
 from datetime import datetime
 from pathlib import Path
 from multiprocessing.connection import Listener
+from websocket import WebSocketTimeoutException
+import socket
+import logging
 
 from .config import Config
 from .match import Match
@@ -19,9 +22,63 @@ from .periodic import periodic_task
 from .workout import Workout
 from .gpio import GPIO
 from .renogy import Renogy
+from .version import Version
+from .api import Api
+
+
+scoreboard = None
+
+
+def ping_success():
+    global scoreboard
+    scoreboard.set_connected()
+
+
+def ping_timeout(ws_app, error):
+    global scoreboard
+
+    if isinstance(error, WebSocketTimeoutException):
+        scoreboard.set_disconnected()
+        scoreboard.api.logger.warning('Ping Timeout')
+
 
 
 class Scoreboard:
+    @classmethod
+    def start(cls, mode, configfile):
+        global scoreboard
+
+        scoreboard = cls()
+        scoreboard.set_config(configfile)
+        scoreboard.init_display_stack()
+        scoreboard.init_gpio()
+        scoreboard.init_solar_ctrl()
+
+        if mode == 'online':
+            scoreboard.api = Api(scoreboard.config.scoreboard["api_key"], scoreboard.config.scoreboard.getint('log_level', logging.WARNING), ping_timeout, ping_success)
+            scoreboard.api.logger.info(f'Scoreboard {scoreboard.config.scoreboard["serial"]} Ver {Version.str()} Online')
+
+            # log the current IP address
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            scoreboard.api.logger.info(f'IP Address = {s.getsockname()[0]}')
+
+            # check if the scoreboard has been reassigned to a different organization
+            sb = scoreboard.api.scoreboard()
+            logo_img = sb["organization"]["abbrev"]
+            if logo_img != scoreboard.config.display.get("logo", logo_img):
+                scoreboard.set_logo(logo_img)
+
+            # check if the scoreboard has been reassigned to a different court
+            court = str(sb['court'])
+            if court != scoreboard.config.scoreboard["court"]:
+                scoreboard.set_court(court)
+
+            scoreboard.online()
+
+        scoreboard.handle_events()
+
+
     def __init__(self):
         self.config = None
         self.display = None

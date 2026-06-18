@@ -28,7 +28,7 @@ setuptools.setup(
             'scoreboard = scoreboard.bin.scoreboard:main',
             'software_update = scoreboard.bin.software_update:main',
             'display = scoreboard.bin.display:main',
-            'sb_online = scoreboard.bin.sb_online:main',
+            'sb_start = scoreboard.bin.sb_start:main',
             'send_event = scoreboard.bin.send_event:main'
         ]
     },
